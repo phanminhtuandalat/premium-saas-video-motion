@@ -27,7 +27,7 @@ const work = path.join(path.dirname(out), '.render-' + path.basename(out, '.mp4'
 const url = pathToFileURL(path.resolve(page)).href;
 
 async function openPage(chromium) {
-  const b = await chromium.launch({ args: ['--disable-gpu-vsync', '--force-color-profile=srgb', '--hide-scrollbars'] });
+  const b = await chromium.launch({ args: ['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--disable-gpu-vsync', '--force-color-profile=srgb', '--hide-scrollbars'] });
   const probe = await b.newPage(); await probe.goto(url); await probe.evaluate(() => window.ready);
   const size = await probe.evaluate(() => window.SIZE || [document.getElementById('stage').offsetWidth, document.getElementById('stage').offsetHeight]);
   const dur = await probe.evaluate(() => window.DUR); await probe.close();

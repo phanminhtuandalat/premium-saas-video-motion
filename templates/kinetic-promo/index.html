@@ -3,6 +3,8 @@
 <title>Kinetic Promo — VideoPremium template</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist:wght@300..800&display=block" rel="stylesheet">
 <script src="../../engine/motion.js"></script>
+<script src="../../engine/vendor/three.min.js"></script>
+<script src="../../engine/scene3d.js"></script>
 <!--
   KINETIC PROMO — Apple-style keynote promo driven by one JSON spec.
   Edit ONLY the <script id="spec"> block below. Shot types:
@@ -15,6 +17,7 @@
     grid    {tiles:[color|img,...], cols}               bento pop → push into centre tile
     split   {pre, text}                                 two-beat line swap ("It's a" → "work of heart.")
     logo    {text, tagline}                             wordmark lands on the wdth axis
+    scene3d {scene:"orbit", caption, colors:[a,b]}      deterministic Three.js scene (engine/scene3d.js), camera = f(beat)
   Common: beats (length), bg, fg, in: push | rise | zoom | iris | none
 -->
 <script id="spec" type="application/json">
@@ -92,6 +95,8 @@ SPEC.shots.forEach(s => {
       el.innerHTML = `<div class="center"><div class="odo disp" style="display:flex;font-size:${px(280)};line-height:1;height:${px(290)};font-variant-numeric:tabular-nums">${[...str].map(ch => /\d/.test(ch) ? `<span class="col" data-d="${ch}" style="display:inline-block;overflow:hidden;height:${px(290)}"><span style="display:block">${[...'01234567890123456789'].map(d => `<span style="display:block;height:${px(290)}">${d}</span>`).join('')}</span></span>` : `<span class="sym" style="display:inline-block">${esc(ch)}</span>`).join('')}</div>
         <div class="roll lb" style="font-size:${px(56)};font-weight:600;color:${T.muted};height:${px(76)};margin-top:${px(24)}"><div>${esc(s.label || '')}</div></div></div>`; break; }
     case 'grid': { const n = s.tiles.length, c = s.cols || 3; el.innerHTML = s.tiles.map((t, k) => `<div class="tile" style="position:absolute;overflow:hidden;background:${/^#|rgb/.test(t) ? t : '#222'}">${/^#|rgb/.test(t) ? '' : `<img src="${t}" style="width:100%;height:100%;object-fit:cover">`}</div>`).join(''); break; }
+    case 'scene3d': { const sc = VP3.make(s.scene || 'orbit', { w: W, h: H, colors: s.colors || T.accent, bg: s.bg }); s.sc = sc; sc.el.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%';
+      el.innerHTML = `<div class="roll cap" style="position:absolute;z-index:2;left:0;right:0;top:${px(90)};text-align:center;font-size:${px(78)};font-weight:650;letter-spacing:-.02em;height:${px(100)}"><div>${esc(s.caption || '')}</div></div>`; el.insertBefore(sc.el, el.firstChild); break; }
     case 'logo': el.innerHTML = `<div class="center"><div class="disp wm" style="font-size:${px(s.size || 260)};font-weight:850;letter-spacing:-.02em">${esc(s.text)}</div><div class="roll tl" style="font-size:${px(54)};font-weight:550;color:${T.muted};height:${px(74)};margin-top:${px(28)}"><div>${esc(s.tagline || '')}</div></div></div>`; break;
   }
   el.querySelectorAll('.acc').forEach(a => a.style.backgroundImage = grad(s.accentColors));
@@ -134,6 +139,7 @@ const ANIM = {
     const mcx = x0 + (mid % c) * (tw + g) + tw / 2, mcy = y0 + Math.floor(mid / c) * (th + g) + th / 2;
     tiles.forEach((t, i) => { const pop = sp(s.start + .1 + i * .18, ...SPR.POP); let rr = [x0 + (i % c) * (tw + g), y0 + Math.floor(i / c) * (th + g), tw, th, 26 * U];
       rr = VP.zoomAbout(rr, mcx, mcy, z); rr[0] += (W / 2 - mcx) * clamp(z - 1); rr[1] += (H / 2 - mcy) * clamp(z - 1); rr = VP.scaleRect(rr, pop); VP.place(t, rr); }); },
+  scene3d(s, lb) { s.sc.draw(lb); rollEl(s.el.querySelector('.cap'), sp(s.start + .6, ...SPR.SNAP)); },
   logo(s, lb) { const wm = s.el.querySelector('.wm'), k = sp(s.start + .15, 1.5, .66);
     wm.style.fontVariationSettings = `'wdth' ${lerp(125, 100, k)}`; wm.style.transform = `scale(${lerp(1.08, 1, k)})`;
     rollEl(s.el.querySelector('.tl'), sp(s.start + 1.4, ...SPR.SNAP)); },
