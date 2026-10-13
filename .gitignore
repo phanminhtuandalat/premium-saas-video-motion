@@ -15,3 +15,8 @@ examples/*.mp4
 _to_delete/
 .DS_Store
 examples/*/out/
+
+# agent tool state and rendered films
+.omc/
+**/.omc/
+examples/**/*.mp4

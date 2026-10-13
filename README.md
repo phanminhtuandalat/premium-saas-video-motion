@@ -13,13 +13,15 @@ Bộ **skill + engine + template + renderer** để các AI agent (Claude, Codex
 | `templates/kinetic-promo/` | Promo kiểu Apple, điều khiển bằng 1 file JSON. Có 9 loại shot: words, glow, device, image, ui, counter, grid, split, logo. Hỗ trợ khung 16:9, 1:1, 9:16 |
 | `templates/keynote-oneshot/` | Một cú máy liền mạch (bản Converse): wordmark → pill → iris → bento → drop zoom → liquid glass → khoá màn hình → Dynamic Island → Safari → thẻ sản phẩm → trạng thái đơn hàng → bức tường. Sửa trong khối `CONFIG` |
 | `templates/ui-loops/` | 8 hiệu ứng UI vòng lặp 8 giây (nút → player, cột → đường, zoom KPI, dock nam châm, chữ co giãn, kính lúp, luồng xung, logo hạt). Bảng 4:5 hoặc `?fx=N` cho 1 hiệu ứng khổ 1:1, `?poster` cho ảnh bìa. Cảm hứng từ bộ kit của Charlie Hills, viết lại từ đầu trên engine VP |
-| `tools/` | Các lệnh: `sheet.mjs` (contact sheet), `render.mjs` (preview/final, song song, chạy tiếp được khi đứt), `beatgrid.py` (BPM, lưới beat, drop, cắt ghép nhạc), `cues.mjs` + `mix.py` (sound design, chuẩn −14 LUFS), `popcheck.py` (bắt khung giật), `install-skill.sh` |
+| `skills/premium-motion-video/references/` | (xem trên) + `timing-easing.md`: bảng thời lượng, easing và 12 nguyên tắc hoạt hình quy ra `VP` |
+| `engine/scene3d.js` + `engine/vendor/three.min.js` | Cảnh 3D Three.js tất định (camera, hạt = hàm của beat). Shot `scene3d` trong `kinetic-promo`, demo ở `examples/scene3d-demo/`. Xem `references/prompt-and-review.md` cho brief 9 lớp, vòng phản biện P0/P1/P2 và cách dùng Skillry làm kho tham chiếu |
+| `tools/` | Các lệnh: `sheet.mjs` (contact sheet), `render.mjs` (preview/final, song song, chạy tiếp được khi đứt), `beatgrid.py` (BPM, lưới beat, drop, cắt ghép nhạc), `cues.mjs` + `mix.py` (sound design, chuẩn −14 LUFS), `popcheck.py` (bắt khung giật), `install-skill.sh`. **Mới:** `wordtimes.py` (mốc từng từ của giọng đọc, Whisper chạy máy → phụ đề karaoke + căn số theo lời), `checkdata.mjs` (số trên màn hình phải khớp bản tin gốc), `audit.mjs` (chữ chồng chéo / bị cắt / ra ngoài vùng an toàn / quá nhỏ), `synthmusic.py` (nhạc nền tự tổng hợp, không vướng bản quyền, theo đúng lưới beat của phim); `sheet.mjs --safe` phủ vùng giao diện TikTok/Reels |
 
 ## Cài đặt (1 lần)
 
 ```bash
 npm i
-python3 -m pip install librosa soundfile numpy
+python3 -m pip install librosa soundfile numpy scipy faster-whisper   # faster-whisper chỉ cần cho wordtimes.py
 bash tools/install-skill.sh
 ```
 

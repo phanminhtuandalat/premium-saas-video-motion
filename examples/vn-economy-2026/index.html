@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<title>Kinh tế Việt Nam 9 tháng 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<script src="data.js"></script>
+<script src="words.js"></script>
+<!--
+  KINH TẾ VIỆT NAM 9 THÁNG 2026 — video dữ liệu 9:16, kiểu Keynote, giọng đọc dẫn nhịp.
+  Mốc thời gian (đơn vị: beat, 1 beat = 60/bpm giây) nằm trong <script id="spec">:
+    vo      = beat bắt đầu của từng câu giọng đọc (tools đọc lại để ghép âm thanh — một nguồn duy nhất)
+    scenes  = [id, beat bắt đầu cảnh, kiểu vào]
+  Nhạc: corporate-drive-100bpm (99,596 BPM). Số liệu: nội dung do người dùng cung cấp.
+-->
+<script id="spec" type="application/json">
+{ "bpm": 99.596, "dur": 108, "captions": true,
+  "vo": { "s1a": 2, "s1b": 12, "s2": 17, "s3": 24, "s4": 37, "s5": 51, "s6": 64, "s7": 76, "s8": 87 },
+  "scenes": [["s1", 0, "none"], ["s2", 16, "rise"], ["s3", 23, "iris"], ["s4", 36, "push"], ["s5", 50, "zoom"], ["s6", 63, "rise"], ["s7", 75, "push"], ["s8", 86, "iris"]] }
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow:hidden;background:#000}
+#stage{position:relative;overflow:hidden;width:1080px;height:1920px;font-family:'Be Vietnam Pro',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.sc{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;will-change:transform}
+.a{position:absolute}
+.roll{position:relative;overflow:hidden}
+.roll>div{will-change:transform;white-space:nowrap}
+.mask{display:inline-block;overflow:hidden;vertical-align:bottom;padding:.16em .03em .16em;margin:-.16em 0}
+.mask>span{display:inline-block;will-change:transform}
+.num{font-family:Archivo,'Be Vietnam Pro',sans-serif;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hd{font-weight:800;letter-spacing:-.025em;line-height:1.1}
+.grad{background-image:linear-gradient(100deg,#FFB020,#FF5A3C);-webkit-background-clip:text;background-clip:text;color:transparent}
+.teal{background-image:linear-gradient(100deg,#19C3A6,#3BD9B8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kick{font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:34px;text-align:center}
+svg{overflow:visible}
+.capi{display:inline-block;padding:14px 30px 16px;border-radius:32px;background:rgba(10,13,20,.82);font-size:46px;font-weight:700;line-height:1.3;color:rgba(255,255,255,.5);text-align:center}
+.cw.on{color:#fff}.cw.cur{color:#FFB020}
+</style></head><body>
+<div id="stage"></div>
+<script>
+const SPEC = JSON.parse(document.getElementById('spec').textContent);
+const W = 1080, H = 1920, V = SPEC.vo;
+const B = VP.clock(SPEC.bpm);
+const { sp, ramp, clamp, lerp, SPR } = VP;
+const C = { ink: '#0A0D14', paper: '#F3F1EC', fg: '#F5F5F7', dk: '#101218', mutedL: '#9AA0AB', mutedD: '#6B6F78', a1: '#FFB020', a2: '#FF5A3C', teal: '#19C3A6' };
+const GR = 'linear-gradient(100deg,#FFB020,#FF5A3C)', GR90 = 'linear-gradient(90deg,#FFB020,#FF5A3C)', TL = 'linear-gradient(90deg,#19C3A6,#3BD9B8)';
+const stage = document.getElementById('stage');
+
+/* ---------- helpers ---------- */
+const mk = (p, css, html = '', cls = '') => { const d = document.createElement('div'); if (cls) d.className = cls; d.style.cssText = css; d.innerHTML = html; p.appendChild(d); return d; };
+const fmt = (v, dec = 0) => { const [i, d] = Math.abs(v).toFixed(dec).split('.'); return (v < 0 ? '-' : '') + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (d ? ',' + d : ''); };
+const cnt = (b0, b1, to, dec) => fmt(to * VP.eOut(ramp(b0, b1, x => x)), dec);
+const show = (el, on) => { el.style.visibility = on ? 'visible' : 'hidden'; };
+const rollK = (r, k) => VP.roll(r.firstElementChild, k, r.offsetHeight);
+const pop = (el, k, y = 60, s0 = .92) => { el.style.transform = `translateY(${((1 - k) * y).toFixed(2)}px) scale(${lerp(s0, 1, k).toFixed(4)})`; el.style.opacity = clamp(k * 5).toFixed(3); show(el, k > .002); };
+/* one-line text that rolls in: rl(parent, css(position/size), html, innerCss) */
+const rl = (p, css, html, inner = '') => mk(p, css, `<div style="${inner}">${html}</div>`, 'roll');
+/* word-by-word headline; word starting with * gets the accent gradient (or *t* teal) */
+const words = (p, css, text, cls = 'hd') => mk(p, css, text.split(' ').map(w => { if (w === '|') return '<br>'; const c = w[0] === '*' ? 'grad' : w[0] === '~' ? 'teal' : ''; return `<span class="mask"><span class="${c}">${w.replace(/^[*~]/, '')}</span></span>`; }).join(' '), cls);
+const wordsAnim = (d, b0, step, out = 0) => d.querySelectorAll('.mask>span').forEach((w, k) => { const v = sp(b0 + k * step, ...SPR.POP); w.style.transform = `translateY(${((1 - v) * 135 - out * 135).toFixed(2)}%)`; });
+const tri = c => `<svg width="30" height="26" viewBox="0 0 30 26" style="margin-right:12px"><path d="M15 2 L28 24 H2 Z" fill="${c}"/></svg>`;
+const glow = (el, cx, cy, R, op) => { el.style.cssText += `;left:${(cx - R).toFixed(1)}px;top:${(cy - R).toFixed(1)}px;width:${(2 * R).toFixed(1)}px;height:${(2 * R).toFixed(1)}px;opacity:${op.toFixed(3)}`; };
+
+/* ---------- data + voice-over anchors ---------- */
+const D = window.DATA, WORDS = window.WORDS || {};
+const dec = v => (String(v).split('.')[1] || '').length, F = v => fmt(v, dec(v)), P = v => '+' + F(v) + '%';
+const nrm = w => w.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+/* beat range [start, end] of a phrase inside voice-over sentence k, from real word timestamps (tools/wordtimes.py) */
+const phr = (k, text) => { const ws = WORDS[k] || [], tk = text.split(' ').map(nrm), n = tk.length;
+  for (let i = 0; i + n <= ws.length; i++) if (tk.every((t, j) => nrm(ws[i + j][0]) === t)) return [V[k] + ws[i][1] / B, V[k] + ws[i + n - 1][2] / B];
+  console.error('phrase not found:', k, text); return [V[k], V[k] + 3]; };
+const T = { s1num: phr('s1a', 'chín phẩy không một phần trăm'), s1q3: phr('s1b', 'gần mười phần trăm'), s2cn: phr('s2', 'mười một phẩy hai mươi mốt'),
+  s3inv: phr('s3', 'mười lăm phẩy một phần trăm'), s3cr: phr('s3', 'gần mười bảy phần trăm'), s3both: phr('s3', 'Cả hai đều nhanh hơn'),
+  s4xk: phr('s4', 'hai mươi bốn phẩy năm phần trăm'), s4nk: phr('s4', 'ba mươi sáu phẩy bảy phần trăm'), s4def: phr('s4', 'gần hai mươi tỷ đô la'),
+  s5a: phr('s5', 'Tám mươi phần trăm'), s5b: phr('s5', 'chín mươi bốn phần trăm'),
+  s6q: phr('s6', 'Còn người lao động'), s6inc: phr('s6', 'chín phẩy một phần trăm'), s6cpi: phr('s6', 'trừ lạm phát'), s6real: phr('s6', 'bốn phẩy bốn'),
+  s7v: phr('s7', 'vốn'), s7c: phr('s7', 'tín dụng'), s7n: phr('s7', 'nhập khẩu'), s7e: phr('s7', 'còn nhanh hơn'),
+  s8: [phr('s8', 'Vậy mỗi một phần trăm'), phr('s8', 'vốn và tín dụng'), phr('s8', 'Tạo ra bao nhiêu'), phr('s8', 'năng suất'), phr('s8', 'Và để lại bao nhiêu'), phr('s8', 'thu nhập thực')] };
+T.s8end = phr('s8', 'cho người dân')[1];
+
+/* ---------- scenes ---------- */
+const BG = { s1: C.ink, s2: C.paper, s3: C.ink, s4: C.paper, s5: C.ink, s6: C.paper, s7: C.ink, s8: C.paper };
+const DARK = id => BG[id] === C.ink;
+const SC = SPEC.scenes.map(([id, start, inn], i, all) => ({ id, start, in: inn, i, end: all[i + 1] ? all[i + 1][1] : SPEC.dur }));
+const BUILD = {}, ANIM = {};
+
+/* ===== S1 — Mở: 9,01% ===== */
+BUILD.s1 = el => { const r = {};
+  r.b1 = mk(el, 'background:radial-gradient(closest-side,rgba(255,150,40,.62),rgba(255,150,40,0))', '', 'a');
+  r.b2 = mk(el, 'background:radial-gradient(closest-side,rgba(255,80,50,.5),rgba(255,80,50,0))', '', 'a');
+  r.grp = mk(el, 'left:0;top:660px;width:1080px;height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px', '', 'a');
+  r.kick = rl(r.grp, 'height:56px;width:1080px', '9 tháng năm 2026', `height:56px;line-height:56px;color:${C.mutedL}`); r.kick.firstElementChild.className = 'kick'; r.kick.firstElementChild.style.fontSize = '44px';
+  r.title = words(r.grp, 'font-size:150px;text-align:center;width:900px', 'Kinh tế | Việt Nam');
+  r.num = mk(el, 'left:0;top:780px;width:1080px;height:310px;text-align:center;font-size:300px;visibility:hidden', '', 'a num grad');
+  r.sub = rl(el, 'left:0;top:1100px;width:1080px;height:90px;position:absolute', 'Tăng trưởng GDP thực', `font-size:56px;font-weight:600;text-align:center;color:#C9CCD4;line-height:90px`);
+  r.pill = mk(el, 'left:160px;top:1330px;width:760px;height:170px;border-radius:85px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.18);display:flex;align-items:center;justify-content:space-between;padding:0 56px;visibility:hidden',
+    `<div style="font-size:38px;font-weight:600;letter-spacing:.14em;color:#C9CCD4;display:flex;align-items:center">${tri('#FFB020')}QUÝ III</div><div class="num grad" style="font-size:104px"></div>`, 'a');
+  r.q3 = r.pill.querySelector('.num');
+  return r; };
+ANIM.s1 = (s, b) => { const r = s.r, t = b * B;
+  const g = sp(0, ...SPR.HEAVY), lit = .22 + .78 * sp(T.s1num[0] - .9, 1.4, .9);
+  glow(r.b1, 260 + Math.sin(t * .9) * 40, 1060, 900 * g, lit); glow(r.b2, 840, 1250 + Math.cos(t * .8) * 40, 720 * g, lit);
+  const [ty, sc] = VP.track([[0, [0, 1]], [T.s1num[0] - 1.0, [-460, .6], 1.5, .85]]);
+  r.grp.style.transform = `translateY(${ty.toFixed(2)}px) scale(${sc.toFixed(4)})`;
+  rollK(r.kick, sp(.4, ...SPR.SNAP)); wordsAnim(r.title, 1.0, .45);
+  show(r.num, b >= T.s1num[0] - .9);
+  r.num.textContent = cnt(T.s1num[0], T.s1num[1] + .3, D.gdp, dec(D.gdp)) + '%';
+  r.num.style.transform = `scale(${lerp(.86, 1, sp(T.s1num[0] - .9, ...SPR.POP)).toFixed(4)})`; r.num.style.fontVariationSettings = `'wdth' ${lerp(125, 100, sp(T.s1num[0] - .9, 1.6, .7)).toFixed(1)}`;
+  rollK(r.sub, sp(T.s1num[0] + .6, ...SPR.SNAP));
+  pop(r.pill, sp(T.s1q3[0] - .4, ...SPR.POP), 80, .9); r.q3.textContent = '+' + cnt(T.s1q3[0], T.s1q3[1] + .3, D.q3, dec(D.q3)) + '%'; };
+
+/* ===== S2 — Theo khu vực ===== */
+const S2ROWS = [['Công nghiệp và xây dựng', D.sector.cnxd, true], ['Dịch vụ', D.sector.dv], ['Nông, lâm nghiệp và thủy sản', D.sector.nlts]];
+const S2K = 640 / 12, S2X = 60, S2Y = [640, 910, 1180];
+BUILD.s2 = el => { const r = { rows: [] };
+  r.kick = rl(el, 'left:0;top:220px;width:1080px;height:56px;position:absolute', 'Tăng trưởng theo khu vực', `height:56px;line-height:56px;color:${C.mutedD}`); r.kick.firstElementChild.className = 'kick';
+  r.title = words(el, 'left:60px;top:292px;width:960px;font-size:100px;text-align:center', 'Ai kéo *tăng *trưởng?', 'a hd');
+  S2ROWS.forEach(([lab, val, hot], i) => { const y = S2Y[i], o = {};
+    o.lab = rl(el, `left:${S2X}px;top:${y}px;width:960px;height:64px;position:absolute`, lab, `font-size:42px;font-weight:600;line-height:64px;color:#3A3D45`);
+    o.trk = mk(el, `left:${S2X}px;top:${y + 80}px;width:960px;height:90px;border-radius:45px;background:rgba(16,18,24,.06)`, '', 'a');
+    o.bar = mk(el, `left:${S2X}px;top:${y + 80}px;width:0;height:90px;border-radius:45px;background:${hot ? GR90 : C.dk}`, '', 'a');
+    o.val = mk(el, `top:${y + 80}px;height:90px;line-height:90px;font-size:88px;${hot ? '' : `color:${C.dk}`}`, '', 'a num' + (hot ? ' grad' : ''));
+    r.rows.push(o); });
+  const lx = S2X + D.gdp * S2K;
+  r.line = mk(el, `left:${lx}px;top:600px;width:0;height:760px;border-left:3px dashed rgba(16,18,24,.4);transform-origin:top`, '', 'a');
+  r.gdp = rl(el, `left:${lx - 150}px;top:536px;width:300px;height:56px;position:absolute`, 'GDP ' + F(D.gdp) + '%', `height:56px;line-height:56px;text-align:center;font-weight:700;font-size:30px;letter-spacing:.06em;color:#fff;background:${C.dk};border-radius:28px`);
+  r.cap = rl(el, 'left:60px;top:1440px;width:960px;height:140px;position:absolute', 'Chỉ công nghiệp và xây dựng vượt mức tăng chung', `font-size:46px;font-weight:600;line-height:1.3;color:#3A3D45;white-space:normal;text-align:center`);
+  return r; };
+ANIM.s2 = (s, b) => { const r = s.r;
+  rollK(r.kick, sp(16.6, ...SPR.SNAP)); wordsAnim(r.title, 16.8, .22);
+  r.rows.forEach((o, i) => { const t0 = 17.4 + i * .45, [, val] = S2ROWS[i], w = val * S2K * sp(t0 + .1, ...SPR.GLIDE);
+    rollK(o.lab, sp(t0, ...SPR.SNAP)); o.bar.style.width = Math.max(0, w).toFixed(1) + 'px'; show(o.trk, b > t0 - .1); show(o.bar, b > t0);
+    o.val.textContent = cnt(t0 + .3, i === 0 ? T.s2cn[1] + .3 : t0 + 3.1, val, dec(val)) + '%'; o.val.style.left = (S2X + w + 28).toFixed(1) + 'px'; show(o.val, b > t0 + .15); });
+  const l = sp(20.7, ...SPR.SNAP); r.line.style.transform = `scaleY(${clamp(l).toFixed(4)})`; r.line.style.width = '3px'; show(r.line, l > .01);
+  rollK(r.gdp, sp(21.0, ...SPR.SNAP)); rollK(r.cap, sp(21.9, ...SPR.SNAP)); };
+
+/* ===== S3 — Vốn, tín dụng, FDI (drop) ===== */
+const S3CARDS = [['Tổng vốn đầu tư toàn xã hội', D.invest.abs, dec(D.invest.abs), 'nghìn tỷ đồng', P(D.invest.g), T.s3inv[0] - .9, 470, T.s3inv[1] + .3], ['Tín dụng', D.credit.abs, dec(D.credit.abs), 'triệu tỷ đồng', P(D.credit.g), T.s3cr[0] - .9, 800, T.s3cr[1] + .3], ['FDI thực hiện', D.fdi.abs, dec(D.fdi.abs), 'tỷ USD', P(D.fdi.g), T.s3both[0], 1130, 0]];
+BUILD.s3 = el => { const r = { cards: [] };
+  r.b1 = mk(el, 'background:radial-gradient(closest-side,rgba(255,110,50,.45),rgba(255,110,50,0))', '', 'a');
+  r.kick = rl(el, 'left:0;top:196px;width:1080px;height:56px;position:absolute', '9 tháng 2026 · so với cùng kỳ', `height:56px;line-height:56px;color:${C.mutedL}`); r.kick.firstElementChild.className = 'kick';
+  r.title = words(el, 'left:0;top:262px;width:1080px;font-size:190px;text-align:center', '*Nhưng', 'a hd');
+  S3CARDS.forEach(([lab, val, dec, unit, chip, , y]) => { const o = {};
+    o.card = mk(el, `left:60px;top:${y}px;width:960px;height:300px;border-radius:44px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12);visibility:hidden`, '', 'a');
+    mk(o.card, 'left:52px;top:44px;font-size:28px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#A9AEB8;white-space:nowrap', lab, 'a');
+    o.chip = mk(o.card, 'right:40px;top:28px;height:76px;padding:0 26px;border-radius:38px;background:' + GR + ';display:flex;align-items:center;color:#10131A', `${tri('#10131A')}<span class="num" style="font-size:48px">${chip}</span>`, 'a');
+    const row = mk(o.card, 'left:52px;top:136px;display:flex;align-items:baseline;gap:20px', `<span class="num o" style="font-size:132px"></span><span style="font-size:42px;font-weight:600;color:#A9AEB8">${unit}</span>`, 'a');
+    o.n = row.querySelector('.o'); r.cards.push(o); });
+  r.ban = rl(el, 'left:60px;top:1500px;width:960px;height:110px;position:absolute', `Đều nhanh hơn tốc độ tăng GDP <span class="grad">${F(D.gdp)}%</span>`, 'font-size:44px;font-weight:700;line-height:110px;text-align:center;color:#fff;border-radius:55px;box-shadow:inset 0 0 0 2px rgba(255,176,32,.7)');
+  return r; };
+ANIM.s3 = (s, b) => { const r = s.r;
+  const g = sp(23, ...SPR.HEAVY); glow(r.b1, 540, 700, 980 * g, .9 * Math.min(1, g));
+  rollK(r.kick, sp(23.6, ...SPR.SNAP)); wordsAnim(r.title, 23.7, .2);
+  r.cards.forEach((o, i) => { const [, val, dc, , , t0, , ce] = S3CARDS[i]; pop(o.card, sp(t0, ...SPR.POP), 90, .94);
+    o.n.textContent = cnt(t0 + .4, ce || t0 + 3.0, val, dc); pop(o.chip, sp(ce ? ce - .5 : t0 + 2.4, ...SPR.POP), 24, .85); });
+  rollK(r.ban, sp(T.s3both[1], ...SPR.SNAP)); };
+
+/* ===== S4 — Xuất khẩu / nhập khẩu ===== */
+const S4BASE = 1430, S4K = 780 / 460, S4XK = D.export.abs, S4NK = D.import.abs;
+BUILD.s4 = el => { const r = {};
+  r.kick = rl(el, 'left:0;top:196px;width:1080px;height:56px;position:absolute', 'Xuất – nhập khẩu · 9 tháng 2026', `height:56px;line-height:56px;color:${C.mutedD}`); r.kick.firstElementChild.className = 'kick';
+  r.title = words(el, 'left:60px;top:262px;width:960px;font-size:74px;text-align:center', 'Xuất khẩu mạnh, | nhập khẩu còn *mạnh *hơn', 'a hd');
+  const bar = (x, h0, bg, col, val, lab, chip, chipBg, chipCol) => { const o = {};
+    o.bar = mk(el, `left:${x}px;width:330px;border-radius:30px 30px 0 0;background:${bg};color:${col};overflow:hidden;visibility:hidden`, `<div style="padding-top:28px;text-align:center"><div class="num o" style="font-size:80px"></div><div style="font-size:34px;font-weight:600;opacity:.8;margin-top:6px">tỷ USD</div></div>`, 'a');
+    o.n = o.bar.querySelector('.o');
+    o.lab = rl(el, `left:${x}px;top:${S4BASE + 20}px;width:330px;height:64px;position:absolute`, lab, 'font-size:46px;font-weight:700;line-height:64px;text-align:center');
+    o.chip = mk(el, `left:${x + 15}px;top:${S4BASE + 100}px;width:300px;height:96px;border-radius:48px;background:${chipBg};color:${chipCol};display:flex;align-items:center;justify-content:center;visibility:hidden`, `${tri(chipCol)}<span class="num" style="font-size:56px">${chip}</span>`, 'a');
+    return o; };
+  r.xk = bar(130, 0, C.dk, '#fff', S4XK, 'Xuất khẩu', P(D.export.g), C.dk, '#fff');
+  r.nk = bar(620, 0, GR, '#10131A', S4NK, 'Nhập khẩu', P(D.import.g), GR, '#10131A');
+  r.base = mk(el, `left:60px;top:${S4BASE}px;width:960px;height:3px;background:rgba(16,18,24,.25);transform-origin:left`, '', 'a');
+  const yx = S4BASE - S4XK * S4K;
+  r.dash = mk(el, `left:130px;top:${yx}px;width:870px;height:0;border-top:3px dashed rgba(16,18,24,.55);transform-origin:left`, '', 'a');
+  r.conn = mk(el, `left:784px;top:600px;width:3px;height:${S4BASE - S4NK * S4K - 600}px;background:${C.dk};transform-origin:top`, '', 'a');
+  r.pill = mk(el, 'left:170px;top:504px;width:740px;height:96px;border-radius:48px;background:' + GR + ';color:#10131A;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700;gap:14px;visibility:hidden', 'Nhập siêu ≈ <span class="num" style="font-size:54px"></span> tỷ USD', 'a');
+  r.ps = r.pill.querySelector('.num'); return r; };
+ANIM.s4 = (s, b) => { const r = s.r;
+  rollK(r.kick, sp(36.5, ...SPR.SNAP)); wordsAnim(r.title, 36.7, .16);
+  r.base.style.transform = `scaleX(${clamp(sp(37.0, ...SPR.SNAP)).toFixed(4)})`;
+  const nk0 = T.s4nk[0] - 1.5, dp = T.s4def[0] - .3;
+  [[r.xk, S4XK, 37.5, T.s4xk[1] + .3, T.s4xk[1]], [r.nk, S4NK, nk0, T.s4nk[1] + .3, T.s4nk[1]]].forEach(([o, v, t0, ce, tc]) => { const h = v * S4K * sp(t0, ...SPR.GLIDE);
+    o.bar.style.top = (S4BASE - h).toFixed(1) + 'px'; o.bar.style.height = Math.max(0, h).toFixed(1) + 'px'; show(o.bar, h > 2);
+    o.n.textContent = cnt(t0 + .4, ce, v, dec(v)); rollK(o.lab, sp(t0 + .5, ...SPR.SNAP)); pop(o.chip, sp(tc, ...SPR.POP), 30, .85); });
+  r.dash.style.transform = `scaleX(${clamp(sp(dp - .4, ...SPR.SNAP)).toFixed(4)})`;
+  pop(r.pill, sp(dp, ...SPR.POP), 50, .9); r.ps.textContent = cnt(dp + .3, T.s4def[1] + .3, D.deficit, dec(D.deficit));
+  r.conn.style.transform = `scaleY(${clamp(sp(dp + .5, ...SPR.SNAP)).toFixed(4)})`; };
+
+/* ===== S5 — Hai vòng tròn: 80,7% và 94,1% ===== */
+BUILD.s5 = el => { const r = {};
+  r.kick = rl(el, 'left:0;top:200px;width:1080px;height:56px;position:absolute', 'Cơ cấu thương mại', `height:56px;line-height:56px;color:${C.mutedL}`); r.kick.firstElementChild.className = 'kick';
+  r.title = words(el, 'left:60px;top:268px;width:960px;font-size:84px;text-align:center', 'Hai con số cần *để *ý', 'a hd');
+  const R = 170, SW = 44, CF = 2 * Math.PI * R;
+  const ring = (cy, stroke, label) => { const o = { CF };
+    o.svg = mk(el, `left:0;top:0;width:1080px;height:1920px;pointer-events:none`, `<svg width="1080" height="1920" viewBox="0 0 1080 1920"><defs><linearGradient id="rg${cy}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB020"/><stop offset="1" stop-color="#FF5A3C"/></linearGradient></defs>
+      <circle cx="540" cy="${cy}" r="${R}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="${SW}"/>
+      <circle class="arc" cx="540" cy="${cy}" r="${R}" fill="none" stroke="${stroke === 'g' ? `url(#rg${cy})` : '#F5F5F7'}" stroke-width="${SW}" stroke-linecap="round" stroke-dasharray="${CF}" stroke-dashoffset="${CF}" transform="rotate(-90 540 ${cy})"/></svg>`, 'a');
+    o.arc = o.svg.querySelector('.arc');
+    o.n = mk(el, `left:0;top:${cy - 45}px;width:1080px;height:90px;text-align:center;font-size:86px;line-height:90px`, '', 'a num');
+    o.lab = rl(el, `left:60px;top:${cy + R + 42}px;width:960px;height:120px;position:absolute`, label, 'font-size:44px;font-weight:600;line-height:1.3;text-align:center;color:#D5D8DE;white-space:normal');
+    return o; };
+  r.r1 = ring(680, 'g', 'kim ngạch xuất khẩu đến từ<br>khu vực FDI (đầu tư nước ngoài)');
+  r.r2 = ring(1290, 'w', 'hàng nhập khẩu là<br>tư liệu sản xuất'); return r; };
+ANIM.s5 = (s, b) => { const r = s.r;
+  rollK(r.kick, sp(50.5, ...SPR.SNAP)); wordsAnim(r.title, 50.7, .2);
+  [[r.r1, D.fdiShareExport, T.s5a[0] - .2, T.s5a[1] + .5], [r.r2, D.inputShareImport, T.s5b[0] - .5, T.s5b[1] + .5]].forEach(([o, v, t0, t1]) => { const p = VP.eOut(ramp(t0, t1, x => x));
+    o.arc.style.strokeDashoffset = (o.CF * (1 - p * v / 100)).toFixed(2); show(o.svg, b > t0 - .2); o.n.textContent = fmt(v * p, dec(v)) + '%'; show(o.n, b > t0 - .1);
+    o.n.style.transform = `scale(${lerp(.9, 1, sp(t0, ...SPR.POP)).toFixed(4)})`; rollK(o.lab, sp(t0 + 1.6, ...SPR.SNAP)); }); };
+
+/* ===== S6 — Người lao động ===== */
+BUILD.s6 = el => { const r = {};
+  r.kick = rl(el, 'left:0;top:300px;width:1080px;height:56px;position:absolute', 'Người lao động', `height:56px;line-height:56px;color:${C.mutedD}`); r.kick.firstElementChild.className = 'kick';
+  r.title = words(el, 'left:90px;top:610px;width:900px;font-size:136px;text-align:center', 'Còn người *lao *động?', 'a hd');
+  r.lab = rl(el, 'left:0;top:410px;width:1080px;height:64px;position:absolute', 'Thu nhập bình quân người lao động', 'font-size:40px;font-weight:600;line-height:64px;text-align:center;color:#3A3D45');
+  r.nbox = mk(el, 'left:0;top:480px;width:1080px;height:300px;overflow:hidden', `<div class="nb" style="will-change:transform"><div class="num n1" style="height:300px;line-height:300px;font-size:240px;text-align:center"></div><div class="num teal n2" style="height:300px;line-height:300px;font-size:240px;text-align:center"></div></div>`, 'a');
+  r.n1 = r.nbox.querySelector('.n1'); r.n2 = r.nbox.querySelector('.n2'); r.nb = r.nbox.querySelector('.nb');
+  r.sbox = mk(el, 'left:0;top:790px;width:1080px;height:84px;overflow:hidden', `<div class="sb" style="will-change:transform"><div style="height:84px;line-height:84px;text-align:center;font-size:52px;font-weight:700;color:#3A3D45">tăng danh nghĩa</div><div style="height:84px;line-height:84px;text-align:center;font-size:52px;font-weight:800;color:#0E9C84">sức mua thực</div></div>`, 'a');
+  r.sb = r.sbox.querySelector('.sb');
+  r.inc = mk(el, `left:190px;top:930px;width:700px;height:100px;border-radius:50px;background:${C.dk};color:#fff;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:600;gap:12px;visibility:hidden`, `≈ <span class="num" style="font-size:52px">${F(D.income.abs)}</span> triệu đồng / tháng`, 'a');
+  r.cpi = mk(el, `left:60px;top:1100px;width:960px;height:130px;border-radius:65px;background:#fff;box-shadow:inset 0 0 0 3px #FF5A3C;display:flex;align-items:center;justify-content:space-between;padding:0 50px;visibility:hidden`, `<div style="font-size:42px;font-weight:700">Trừ lạm phát (CPI)</div><div class="num grad" style="font-size:74px"></div>`, 'a');
+  r.cp = r.cpi.querySelector('.num');
+  r.job = mk(el, `left:60px;top:1380px;width:960px;height:150px;border-radius:44px;background:${C.dk};color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 50px;visibility:hidden`, `<div><div style="font-size:30px;font-weight:600;letter-spacing:.1em;color:#A9AEB8">VIỆC LÀM</div><div style="font-size:50px;font-weight:700;margin-top:4px"><span class="num" style="font-size:60px">${F(D.jobs.abs)}</span> triệu người</div></div><div style="display:flex;align-items:center;background:${GR};color:#10131A;border-radius:36px;padding:10px 26px 10px 22px">${tri('#10131A')}<span class="num" style="font-size:52px">${P(D.jobs.g)}</span></div>`, 'a');
+  return r; };
+ANIM.s6 = (s, b) => { const r = s.r;
+  rollK(r.kick, sp(63.6, ...SPR.SNAP)); wordsAnim(r.title, 63.9, .3, sp(T.s6q[1] + .4, ...SPR.SNAP));
+  rollK(r.lab, sp(T.s6q[1] + .5, ...SPR.SNAP));
+  const n0 = T.s6inc[0] - .7; show(r.nbox, b >= n0); r.n1.textContent = '+' + cnt(T.s6inc[0], T.s6inc[1] + .3, D.income.g, dec(D.income.g)) + '%'; r.n2.textContent = '≈ ' + P(D.realIncome);
+  const o = sp(T.s6real[0] - .3, ...SPR.SNAP); r.nb.style.transform = `translateY(${(-o * 300).toFixed(2)}px)`; r.sb.style.transform = `translateY(${(-o * 84).toFixed(2)}px)`;
+  r.nbox.style.transform = `scale(${lerp(.9, 1, sp(n0, ...SPR.POP)).toFixed(4)})`; show(r.sbox, b >= n0 + .5);
+  r.sbox.style.transform = `translateY(${((1 - sp(n0 + .5, ...SPR.SNAP)) * 40).toFixed(2)}px)`;
+  pop(r.inc, sp(T.s6inc[0] + .5, ...SPR.POP), 50, .9);
+  pop(r.cpi, sp(T.s6cpi[0] - .3, ...SPR.POP), 70, .94); r.cp.textContent = '− ' + cnt(T.s6cpi[0], T.s6cpi[1] + .3, D.cpi, dec(D.cpi)) + '%';
+  pop(r.job, sp(T.s6cpi[1] + .4, ...SPR.POP), 70, .94); };
+
+/* ===== S7 — Bảng so sánh với GDP ===== */
+const S7ROWS = [['Nhập khẩu', D.import.g, T.s7n[0] - .2, 'g'], ['Xuất khẩu', D.export.g, T.s7n[1], 'g'], ['Tín dụng', D.credit.g, T.s7c[0] - .2, 'g'], ['Vốn đầu tư toàn xã hội', D.invest.g, T.s7v[0] - .2, 'g'], ['FDI thực hiện', D.fdi.g, T.s7n[1] + .5, 'g'], ['GDP thực', D.gdp, 76.4, 'w'], ['Sức mua thực của thu nhập', D.realIncome, T.s7e[1] + .6, 't']]
+  .map(([l, v, t0, k]) => [l, v, fmt(v / D.gdp, 1), t0, k, dec(v)]);   // [nhãn, giá trị, bội số so với GDP, beat, loại, số lẻ]
+const S7K = 560 / D.import.g, S7X = 60, S7Y0 = 500, S7P = 148;
+BUILD.s7 = el => { const r = { rows: [] };
+  r.kick = rl(el, 'left:0;top:196px;width:1080px;height:56px;position:absolute', 'Tốc độ tăng · 9 tháng 2026 (%)', `height:56px;line-height:56px;color:${C.mutedL}`); r.kick.firstElementChild.className = 'kick';
+  r.title = words(el, 'left:40px;top:262px;width:1000px;font-size:68px;text-align:center;white-space:nowrap', 'Ai nhanh hơn *GDP?', 'a hd');
+  S7ROWS.forEach(([lab, v, mult, , kind], i) => { const y = S7Y0 + i * S7P, o = {};
+    const col = kind === 'g' ? GR90 : kind === 'w' ? '#F5F5F7' : TL;
+    o.lab = rl(el, `left:${S7X}px;top:${y}px;width:900px;height:48px;position:absolute`, lab, `font-size:34px;font-weight:600;line-height:48px;color:${kind === 't' ? '#3BD9B8' : '#C9CCD4'}`);
+    o.bar = mk(el, `left:${S7X}px;top:${y + 56}px;width:0;height:58px;border-radius:29px;background:${col}`, '', 'a');
+    o.val = mk(el, `top:${y + 56}px;height:58px;line-height:58px;font-size:52px;color:${kind === 't' ? '#3BD9B8' : '#fff'}`, '', 'a num');
+    o.chip = mk(el, `right:60px;top:${y + 54}px;width:140px;height:62px;border-radius:31px;box-shadow:inset 0 0 0 2px ${kind === 't' ? '#3BD9B8' : 'rgba(255,255,255,.35)'};display:flex;align-items:center;justify-content:center;font-size:40px;color:${kind === 't' ? '#3BD9B8' : '#fff'}`, `×${mult}`, 'a num');
+    r.rows.push(o); });
+  const lx = S7X + D.gdp * S7K;
+  r.line = mk(el, `left:${lx}px;top:470px;width:0;height:${S7P * 7 - 10}px;border-left:3px dashed rgba(255,255,255,.55);transform-origin:top`, '', 'a');
+  r.foot = rl(el, 'left:60px;top:1590px;width:960px;height:50px;position:absolute', '× = gấp bao nhiêu lần tốc độ tăng GDP (' + F(D.gdp) + '%)', `font-size:30px;font-weight:500;text-align:center;line-height:50px;color:${C.mutedL}`);
+  return r; };
+ANIM.s7 = (s, b) => { const r = s.r;
+  rollK(r.kick, sp(75.5, ...SPR.SNAP)); wordsAnim(r.title, 75.7, .2);
+  const l = sp(76.2, ...SPR.SNAP); r.line.style.transform = `scaleY(${clamp(l).toFixed(4)})`; r.line.style.width = '3px'; show(r.line, l > .01);
+  r.rows.forEach((o, i) => { const [, v, , t0, , dec] = S7ROWS[i], w = v * S7K * sp(t0 + .1, ...SPR.GLIDE);
+    rollK(o.lab, sp(t0, ...SPR.SNAP)); o.bar.style.width = Math.max(0, w).toFixed(1) + 'px'; show(o.bar, b > t0);
+    o.val.textContent = cnt(t0 + .2, t0 + 1.7, v, dec) + '%';
+    o.val.style.left = (S7X + w + 22).toFixed(1) + 'px'; show(o.val, b > t0 + .15); pop(o.chip, sp(t0 + 1.2, ...SPR.POP), 20, .8); });
+  rollK(r.foot, sp(S7ROWS[6][3] + .8, ...SPR.SNAP)); };
+
+/* ===== S8 — Ba câu hỏi + chốt ===== */
+const S8BLK = [['01', 'Mỗi 1% tăng trưởng tốn bao nhiêu', '*vốn *và *tín *dụng?', T.s8[0][0], T.s8[1][0], 470], ['02', 'Tạo ra bao nhiêu', '*năng *suất mới?', T.s8[2][0], T.s8[3][0], 870], ['03', 'Để lại cho người dân bao nhiêu', '~thu ~nhập ~thực?', T.s8[4][0], T.s8[5][0], 1270]];
+BUILD.s8 = el => { const r = { blk: [] };
+  S8BLK.forEach(([no, lead, key, , , y]) => { const o = {};
+    o.no = rl(el, `left:60px;top:${y}px;width:300px;height:48px;position:absolute`, no, `font-family:Archivo,sans-serif;font-size:34px;font-weight:700;letter-spacing:.2em;line-height:48px;color:${C.mutedD}`);
+    o.lead = rl(el, `left:60px;top:${y + 52}px;width:960px;height:76px;position:absolute`, lead, `font-size:48px;font-weight:600;line-height:76px;color:#3A3D45`);
+    o.key = words(el, `left:60px;top:${y + 140}px;width:960px;font-size:116px;white-space:nowrap`, key, 'a hd');
+    r.blk.push(o); });
+  r.tag = mk(el, 'left:0;top:0;width:1080px;height:1920px;visibility:hidden', `
+    <div class="a" style="left:0;top:520px;width:1080px;text-align:center"><div class="roll l1" style="height:380px"><div class="num grad" style="font-size:330px;line-height:380px;text-align:center">${F(D.gdp)}%</div></div></div>
+    <div class="a" style="left:100px;top:960px;width:880px"><div class="roll l2" style="height:240px"><div style="font-size:52px;font-weight:700;line-height:1.3;text-align:center;white-space:normal;color:${C.dk}">Con số rất đẹp.<br>Câu hỏi quan trọng hơn là<br><span class="grad">chất lượng</span> tăng trưởng.</div></div></div>
+    <div class="a" style="left:0;top:1380px;width:1080px"><div class="roll l3" style="height:56px"><div class="kick" style="line-height:56px;color:${C.mutedD}">Việt Nam · 9 tháng năm 2026</div></div></div>`, 'a');
+  r.l1 = r.tag.querySelector('.l1'); r.l2 = r.tag.querySelector('.l2'); r.l3 = r.tag.querySelector('.l3'); return r; };
+ANIM.s8 = (s, b) => { const r = s.r, OUT = T.s8end + .9;
+  r.blk.forEach((o, i) => { const [, , , t0, tk] = S8BLK[i], oo = sp(OUT + i * .15, ...SPR.SNAP);
+    rollK(o.no, sp(t0, ...SPR.SNAP) + oo); rollK(o.lead, sp(t0 + .1, ...SPR.SNAP) + oo); wordsAnim(o.key, tk, .28, oo); });
+  show(r.tag, b >= OUT - .1); rollK(r.l1, sp(OUT + .6, ...SPR.HEAVY)); rollK(r.l2, sp(OUT + 1.5, ...SPR.SNAP)); rollK(r.l3, sp(OUT + 2.6, ...SPR.SNAP));
+  r.tag.style.transform = `scale(${lerp(.96, 1, sp(OUT + .6, 1.2, .8)).toFixed(4)})`; };
+
+/* ---------- build ---------- */
+/* 9:16 safe area: every scene's content is built in a 1080×1920 layer, then fitted into y 221…1536 (top 11.5 % / bottom 20 % are platform UI) */
+SC.forEach(s => { s.el = mk(stage, `background:${BG[s.id]};color:${DARK(s.id) ? C.fg : C.dk};z-index:${s.i + 1}`, '', 'sc');
+  s.r = BUILD[s.id](mk(s.el, 'left:0;top:0;width:1080px;height:1920px;transform-origin:540px 196px;transform:translateY(25px) scale(.917)', '', 'a')); });
+
+/* ---------- captions: karaoke theo từng từ (words.js) ---------- */
+const CAP = (() => { if (!SPEC.captions || !window.WORDS) return null;
+  const pages = [];
+  Object.keys(V).forEach(k => { const ws = WORDS[k]; if (!ws) return; const t0 = V[k] * B, pieces = []; let cl = [];
+    const L = a => a.map(x => x[0]).join(' ').length;
+    const clause = c => { const n = Math.ceil(L(c) / 40); for (let q = 0; q < n; q++) pieces.push(c.slice(Math.round(q * c.length / n), Math.round((q + 1) * c.length / n))); };
+    ws.forEach(w => { cl.push(w); if (/[,.?!]$/.test(w[0])) { clause(cl); cl = []; } }); if (cl.length) clause(cl);
+    const loc = []; let cur = [];
+    pieces.forEach(pc => { if (cur.length && L(cur.concat(pc)) > 44) { loc.push(cur); cur = []; } cur = cur.concat(pc); }); if (cur.length) loc.push(cur);
+    loc.forEach(c => pages.push({ from: t0 + c[0][1] - .12, to: t0 + c[c.length - 1][2] + .25, ws: c.map(w => ({ w: w[0], s: t0 + w[1], e: t0 + w[2] })) })); });
+  pages.sort((a, b) => a.from - b.from); pages.forEach((p, i) => { if (pages[i + 1]) p.to = Math.min(p.to, pages[i + 1].from); });
+  return { pages, idx: -2, spans: [], el: mk(stage, 'left:60px;top:1552px;width:960px;height:150px;z-index:200;display:flex;align-items:center;justify-content:center;opacity:0', '', 'a') }; })();
+function captions(t) { if (!CAP) return;
+  const i = CAP.pages.findIndex(p => t >= p.from && t < p.to);
+  if (i !== CAP.idx) { CAP.idx = i; CAP.el.innerHTML = i < 0 ? '' : `<div class="capi">${CAP.pages[i].ws.map(w => `<span class="cw">${w.w}</span>`).join(' ')}</div>`; CAP.spans = [...CAP.el.querySelectorAll('.cw')]; }
+  if (i < 0) { CAP.el.style.opacity = 0; return; }
+  const p = CAP.pages[i]; CAP.el.style.opacity = (clamp((t - p.from) / .1) * clamp((p.to - t) / .1)).toFixed(3);
+  p.ws.forEach((w, k) => { CAP.spans[k].className = 'cw' + (t >= w.s ? ' on' : '') + (t >= w.s && t < w.e + .08 ? ' cur' : ''); }); }
+
+/* ---------- transitions: next scene covers the previous one ---------- */
+function transform(s) {
+  const k = s.in === 'none' ? 1 : sp(s.start, 1.5, .86), nx = SC[s.i + 1], kx = nx && nx.in !== 'none' ? sp(nx.start, 1.5, .86) : 0;
+  let tf = '', clip = '';
+  switch (s.in) {
+    case 'push': tf += `translateX(${((1 - k) * W).toFixed(2)}px) `; break;
+    case 'rise': tf += `translateY(${((1 - k) * H).toFixed(2)}px) `; break;
+    case 'zoom': tf += `scale(${lerp(.72, 1, k).toFixed(4)}) `; clip = `inset(${((1 - k) * H / 2).toFixed(1)}px ${((1 - k) * W / 2).toFixed(1)}px round ${((1 - k) * 60).toFixed(1)}px)`; break;
+    case 'iris': clip = `circle(${(Math.hypot(W, H) / 2 * k).toFixed(1)}px at 50% 50%)`; break;
+  }
+  if (nx) switch (nx.in) {
+    case 'push': tf += `translateX(${(-kx * W * .35).toFixed(2)}px) `; break;
+    case 'rise': tf += `translateY(${(-kx * H * .25).toFixed(2)}px) `; break;
+    case 'zoom': tf += `scale(${lerp(1, 1.18, kx).toFixed(4)}) `; break;
+    case 'iris': tf += `scale(${lerp(1, .94, kx).toFixed(4)}) `; break;
+  }
+  s.el.style.transform = tf; s.el.style.clipPath = clip;
+}
+function frame(t) {
+  const b = VP.at(t);
+  SC.forEach(s => {
+    const on = b >= s.start - .02 && b < s.end + 2.4;
+    s.el.style.display = on ? 'block' : 'none'; if (!on) return;
+    transform(s); ANIM[s.id](s, b);
+  });
+  captions(t);
+}
+/* sound cues for tools/mix.py — sparse, the voice leads */
+function cues() {
+  const c = [];
+  [[16, 'swoosh'], [23, 'swoosh-deep'], [36, 'swoosh'], [50, 'swoosh-deep'], [63, 'swoosh'], [75, 'swoosh'], [86, 'swoosh-deep']].forEach(([b, t]) => c.push({ beat: b, type: t, gain: -19 }));
+  c.push({ beat: 23.4, type: 'boom', gain: -15 });
+  [T.s1num[1], T.s2cn[1], T.s4xk[1], T.s4nk[1], T.s5a[1] + .4, T.s5b[1] + .4, T.s6real[1]].forEach(b => c.push({ beat: b, type: 'tick', gain: -23 }));
+  c.push({ beat: T.s8end + 1.5, type: 'hit', gain: -15 });
+  return c;
+}
+VP.boot({ seek: frame, dur: SPEC.dur * B, cues, fonts: ['800 100px Archivo', '800 100px "Be Vietnam Pro"', '600 40px "Be Vietnam Pro"'] });
+window.SIZE = [W, H]; window.BPM = SPEC.bpm; window.B = B;
+</script></body></html>

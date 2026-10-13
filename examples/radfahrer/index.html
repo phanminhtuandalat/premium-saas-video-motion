@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<title>Radfahrer</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;1,400;1,600&family=Be+Vietnam+Pro:wght@400;500;600&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<!--
+  RADFAHRER — "người đạp xe": cúi lưng trước kẻ trên, đạp xuống kẻ dưới. 1:1, đơn sắc, SFX không nhạc.
+  Hình được dựng lại bằng SVG từ hình gốc (hệ toạ độ 1280×1280, thu về 1080).
+  Mốc thời gian tính bằng beat (1 beat = 0,6 s): bánh/bàn đạp quay theo PHI(b); mỗi beat một cú giẫm, người thứ i bị giẫm đúng beat 14+i.
+-->
+<script id="spec" type="application/json">{ "bpm": 100, "dur": 28 }</script>
+<script>window.AUDIT = { beats: [3.5, 12.6, 15.6, 18.6, 21.6, 26], minFont: 26 };   /* tools/audit.mjs: settled moments */</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow:hidden;background:#fff}
+#stage{position:relative;overflow:hidden;width:1080px;height:1080px;background:#fff;font-family:'Be Vietnam Pro',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+#world{position:absolute;left:0;top:0;width:1280px;height:1280px;transform:scale(.84375);transform-origin:0 0}
+.a{position:absolute}
+.roll{position:absolute;overflow:hidden}
+.roll>div{will-change:transform;white-space:nowrap}
+.mask{display:inline-block;overflow:hidden;vertical-align:bottom;padding:.16em .01em;margin:-.16em 0}
+.mask>span{display:inline-block;will-change:transform}
+.red{color:#D93025}
+</style></head><body>
+<div id="stage"><div id="world"></div></div>
+<script>
+const SPEC = JSON.parse(document.getElementById('spec').textContent);
+const B = VP.clock(SPEC.bpm);
+const { sp, ramp, clamp, lerp, SPR } = VP;
+const world = document.getElementById('world'), NS = 'http://www.w3.org/2000/svg';
+const f1 = v => v.toFixed(1);
+const E = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const rl = (css, html, inner) => { const d = document.createElement('div'); d.className = 'roll'; d.style.cssText = css; d.innerHTML = `<div style="${inner}">${html}</div>`; world.appendChild(d); return d; };
+const rollK = (r, k) => VP.roll(r.firstElementChild, k, r.offsetHeight);
+
+/* ---------- SVG scene ---------- */
+const svg = E('svg', { width: 1280, height: 1280, viewBox: '0 0 1280 1280' }); svg.style.cssText = 'position:absolute;left:0;top:0'; world.appendChild(svg);
+const defs = E('defs', {}, svg); E('rect', { x: 60, y: 880, width: 1160, height: 240 }, E('clipPath', { id: 'gc' }, defs));
+const ground = E('line', { x1: 60, y1: 1100, x2: 60, y2: 1100, stroke: '#111', 'stroke-width': 3, 'stroke-linecap': 'round' }, svg);
+
+/* the crowd below: 8 people, one stomped per beat */
+const FIRST = 14, NP = 8, V0 = 130, PX = 610;               // first stomp beat, number of people, px per beat, pedal x
+const pg = E('g', { 'clip-path': 'url(#gc)' }, svg);
+const people = [...Array(NP)].map(() => { const g = E('g', {}, pg);
+  E('circle', { cx: 0, cy: -80, r: 28, fill: '#fff', stroke: '#111', 'stroke-width': 5 }, g); E('circle', { cx: 0, cy: -38, r: 37, fill: '#fff', stroke: '#111', 'stroke-width': 5 }, g);
+  const dust = E('g', {}, pg); const ls = [...Array(7)].map(() => E('line', { stroke: '#8a8a8a', 'stroke-width': 4, 'stroke-linecap': 'round' }, dust)); return { g, dust, ls }; });
+
+/* the one above */
+const king = E('g', {}, svg);
+E('rect', { x: 833, y: 372, width: 80, height: 238, rx: 40, fill: '#111' }, king); E('rect', { x: 1145, y: 372, width: 80, height: 238, rx: 40, fill: '#111' }, king);
+E('rect', { x: 900, y: 312, width: 257, height: 398, rx: 52, fill: '#111' }, king); E('circle', { cx: 1029, cy: 225, r: 82, fill: '#111' }, king);
+const crown = E('polygon', { points: '960,155 976,88 1003,128 1029,92 1057,128 1085,88 1098,155', fill: '#fff', stroke: '#111', 'stroke-width': 5, 'stroke-linejoin': 'round' }, king);
+
+/* bike + cyclist rig */
+const rig = E('g', {}, svg), GY = '#6e6e6e';
+const wheel = (cx) => { const g = E('g', {}, rig); E('circle', { cx: 0, cy: 0, r: 133, fill: 'none', stroke: GY, 'stroke-width': 9 }, g); E('line', { x1: 0, y1: -133, x2: 0, y2: -92, stroke: GY, 'stroke-width': 9, 'stroke-linecap': 'round' }, g); g._cx = cx; return g; };
+const wr = wheel(423), wf = wheel(845);
+const BBx = 612, BBy = 878, HIP = [497, 628];
+E('polyline', { points: `423,845 ${BBx},${BBy} 520,655 423,845`, fill: 'none', stroke: GY, 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+E('polyline', { points: `520,655 745,662 ${BBx},${BBy} 745,662 845,845`, fill: 'none', stroke: GY, 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+E('polyline', { points: '745,662 770,620 815,615', fill: 'none', stroke: GY, 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+E('line', { x1: 485, y1: 656, x2: 540, y2: 656, stroke: GY, 'stroke-width': 10, 'stroke-linecap': 'round' }, rig);
+const limb = (col, w) => ({ crank: E('line', { stroke: GY, 'stroke-width': 8, 'stroke-linecap': 'round' }, rig), pedal: E('rect', { width: 92, height: 22, rx: 7, fill: GY }, rig), leg: E('polyline', { fill: 'none', stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig) });
+const far = limb('#4a4a4a', 22), near = limb('#111', 24);
+const torso = E('path', { fill: 'none', stroke: '#111', 'stroke-width': 24, 'stroke-linecap': 'round' }, rig);
+const arm = E('polyline', { fill: 'none', stroke: '#111', 'stroke-width': 22, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+const head = E('circle', { r: 38, fill: '#111' }, rig);
+const dashes = []; { const x0 = 508, y0 = 345, x1 = 735, y1 = 505, n = 17; for (let i = 0; i < n; i++) { const a = i / n, c = (i + .55) / n; dashes.push(E('line', { x1: lerp(x0, x1, a), y1: lerp(y0, y1, a), x2: lerp(x0, x1, c), y2: lerp(y0, y1, c), stroke: '#777', 'stroke-width': 2, 'stroke-linecap': 'round' }, svg)); } }
+
+/* ---------- text ---------- */
+const title = document.createElement('div'); title.className = 'a'; title.style.cssText = "left:137px;top:34px;font-family:'Noto Serif',serif;font-weight:400;font-size:88px;line-height:1.15;color:#111;letter-spacing:-.01em";
+title.innerHTML = [...'Radfahrer'].map(ch => `<span class="mask"><span>${ch}</span></span>`).join(''); world.appendChild(title);
+const sub = rl('left:137px;top:138px;width:700px;height:56px', 'người đạp xe', 'font-size:40px;line-height:56px;color:#555');
+const lab = rl('left:137px;top:282px;width:800px;height:56px', 'cúi lưng trước kẻ trên', 'font-size:40px;line-height:56px;color:#555');
+const cap = rl('left:0;top:1130px;width:1280px;height:60px', 'đạp xuống kẻ dưới', 'font-size:40px;line-height:60px;color:#555;text-align:center');
+const ger = rl('left:0;top:1110px;width:1280px;height:76px', 'nach oben <span class="red">buckeln</span>, nach unten <span class="red">treten</span>', "font-family:'Noto Serif',serif;font-style:italic;font-weight:600;font-size:48px;line-height:76px;color:#111;text-align:center");
+const tr = rl('left:0;top:1192px;width:1280px;height:44px', 'cúi lưng lên trên, đạp xuống dưới', 'font-size:30px;line-height:44px;color:#777;text-align:center');
+
+/* ---------- motion ---------- */
+const PHI = b => { const x = clamp((b - 7.5) / 3); return b <= 10.5 ? 3 * (x ** 3 - x ** 4 / 2) : 1.5 + (b - 10.5); };   // pedalling ramps up 7.5→10.5, then 1 half-turn per beat
+const ik = (hip, foot, L1, L2) => { const dx = foot[0] - hip[0], dy = foot[1] - hip[1], d = Math.min(Math.hypot(dx, dy), L1 + L2 - .01), ux = dx / d, uy = dy / d;
+  const a = (L1 * L1 - L2 * L2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, L1 * L1 - a * a)); return [hip[0] + ux * a + uy * h, hip[1] + uy * a - ux * h]; };   // knee forward (+x)
+const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [0, 1].map(k => u * u * u * p0[k] + 3 * u * u * t * p1[k] + 3 * u * t * t * p2[k] + t * t * t * p3[k]); };
+const L2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+
+function frame(t) {
+  const b = VP.at(t);
+  /* title + captions */
+  title.querySelectorAll('.mask>span').forEach((w, k) => { const v = sp(.3 + k * .16, ...SPR.POP); w.style.transform = `translateY(${((1 - v) * 135).toFixed(2)}%)`; });
+  rollK(sub, sp(2.3, ...SPR.SNAP)); rollK(lab, sp(11.8, ...SPR.SNAP));
+  rollK(cap, sp(14.3, ...SPR.SNAP) + sp(22.0, ...SPR.SNAP)); rollK(ger, sp(22.2, ...SPR.SNAP)); rollK(tr, sp(23.3, ...SPR.SNAP));
+  /* ground */
+  ground.setAttribute('x2', f1(60 + 1160 * VP.eOut(ramp(4.8, 6.4, x => x))));
+  /* king: rises, crown wobbles, puffs when the cyclist bows */
+  const rise = (1 - sp(4.3, 1.2, .75)) * 900, u = Math.max(0, (b - 5.0) * B), puff = sp(11.0, 2, .6);
+  king.setAttribute('transform', `translate(0 ${f1(rise)}) translate(1029 700) scale(${(1 + .02 * puff).toFixed(4)} ${(1 + .03 * puff + .006 * Math.sin(b * 1.7)).toFixed(4)}) rotate(${(-2.5 * puff).toFixed(2)}) translate(-1029 -700)`);
+  crown.setAttribute('transform', `rotate(${(7 * Math.exp(-3.2 * u) * Math.sin(15 * u)).toFixed(2)} 1029 155)`);
+  king.style.display = b > 4.2 ? 'block' : 'none';
+  /* bike rolls in from the left, pedalling in place afterwards */
+  const dx = -900 * (1 - VP.eOut(ramp(5.2, 9.0, x => x))); rig.setAttribute('transform', `translate(${f1(dx)} 0)`); rig.style.display = b > 5.1 ? 'block' : 'none';
+  const rot = ((dx + 900) / 133 + 1.6 * Math.PI * PHI(b)) * 180 / Math.PI;
+  wr.setAttribute('transform', `translate(423 845) rotate(${f1(rot)})`); wf.setAttribute('transform', `translate(845 845) rotate(${f1(rot)})`);
+  const th = Math.PI / 2 + Math.PI * (PHI(b) - PHI(FIRST)), R = 105;
+  [[near, th], [far, th + Math.PI]].forEach(([l, a]) => { const px = BBx + R * Math.cos(a), py = BBy + R * Math.sin(a), knee = ik(HIP, [px, py - 12], 195, 195);
+    l.crank.setAttribute('x1', BBx); l.crank.setAttribute('y1', BBy); l.crank.setAttribute('x2', f1(px)); l.crank.setAttribute('y2', f1(py));
+    l.pedal.setAttribute('x', f1(px - 46)); l.pedal.setAttribute('y', f1(py - 11)); l.leg.setAttribute('points', `${HIP[0]},${HIP[1]} ${f1(knee[0])},${f1(knee[1])} ${f1(px)},${f1(py - 12)}`); });
+  /* back bows to the king */
+  const bow = sp(10.8, 1.6, .7), N = L2([585, 455], [745, 525], bow), c1 = L2([500, 560], [520, 560], bow), c2 = L2([520, 490], [610, 500], bow), hd = L2([606, 418], [790, 553], bow);
+  torso.setAttribute('d', `M${HIP[0]} ${HIP[1]} C${f1(c1[0])} ${f1(c1[1])} ${f1(c2[0])} ${f1(c2[1])} ${f1(N[0])} ${f1(N[1])}`);
+  const S = bez(HIP, c1, c2, N, .62); arm.setAttribute('points', `${f1(S[0])},${f1(S[1])} 800,617`);
+  head.setAttribute('cx', f1(hd[0])); head.setAttribute('cy', f1(hd[1]));
+  /* the crowd: one person arrives under the pedal every beat and is stomped flat */
+  people.forEach((p, i) => { const ts = FIRST + i, x = PX + V0 * (ts - b), uu = (b - ts) * B;
+    const s = uu < 0 ? 1 : 1 - .68 * VP.spring(uu, 3.2, .5), hop = uu < 0 ? -7 * Math.abs(Math.sin(Math.PI * (b - ts))) : 0, sx = lerp(1, 1.4, (1 - s) / .68);
+    p.g.setAttribute('transform', `translate(${f1(x)} ${f1(1100 + hop)}) scale(${sx.toFixed(3)} ${Math.max(.05, s).toFixed(3)})`);
+    const d = uu >= 0 && uu < .3 ? uu / .3 : -1;
+    p.ls.forEach((ln, k) => { const ang = Math.PI * (1.08 + .84 * k / 6), r0 = 48 + 110 * Math.max(0, d), r1 = r0 + 24;
+      ln.setAttribute('x1', f1(x + r0 * Math.cos(ang))); ln.setAttribute('y1', f1(1085 + r0 * Math.sin(ang))); ln.setAttribute('x2', f1(x + r1 * Math.cos(ang))); ln.setAttribute('y2', f1(1085 + r1 * Math.sin(ang))); });
+    p.dust.setAttribute('opacity', d < 0 ? 0 : (1 - d).toFixed(2)); });
+  dashes.forEach((ln, i) => ln.setAttribute('opacity', b >= 12.0 + i * .06 ? 1 : 0));
+}
+/* sound cues (tools/mix.py with examples/radfahrer/sfx.json) — dry on purpose */
+function cues() {
+  const c = [{ beat: 4.9, type: 'boom', gain: -16 }, { beat: 5.2, type: 'swoosh', gain: -19 }, { beat: 22.2, type: 'hit', gain: -20 }, { beat: 23.0, type: 'womp', gain: -19 }];
+  for (let i = 0; i < NP; i++) c.push({ beat: FIRST + i, type: 'punch', gain: -21 });
+  return c;
+}
+VP.boot({ seek: frame, dur: SPEC.dur * B, cues, fonts: ['400 80px "Noto Serif"', 'italic 600 48px "Noto Serif"', '400 40px "Be Vietnam Pro"'] });
+window.SIZE = [1080, 1080]; window.BPM = SPEC.bpm; window.B = B;
+</script></body></html>

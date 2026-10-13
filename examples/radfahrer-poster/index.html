@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<title>Radfahrer — poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<!--
+  RADFAHRER — phiên bản áp phích Bauhaus. 1:1, kem / đen / đỏ (đỏ = quyền lực + va chạm). Không nhạc, chỉ SFX.
+  Kể như một câu đùa có chuẩn bị: cúi lưng (9.4–11) → im lặng → 3 cú giẫm leo thang (15, 16, 17) → câu chốt (21).
+  Kịch bản từng cảnh: video-spec.md. Mốc thời gian tính bằng beat (1 beat = 0,6 s).
+-->
+<script id="spec" type="application/json">{ "bpm": 100, "dur": 28 }</script>
+<script>window.AUDIT = { beats: [3.4, 8.8, 13.6, 18.4, 22.8, 27], minFont: 26 };   /* tools/audit.mjs: settled moments */</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow:hidden;background:#F1E9D8}
+#stage{position:relative;overflow:hidden;width:1080px;height:1080px;background:#F1E9D8;color:#111;font-family:'Be Vietnam Pro',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.a{position:absolute}
+.roll{position:absolute;overflow:hidden}
+.roll>div{will-change:transform;white-space:nowrap}
+.mask{display:inline-block;overflow:hidden;vertical-align:bottom;padding:.12em .01em;margin:-.12em 0}
+.mask>span{display:inline-block;will-change:transform}
+.red{color:#D7261E}
+#flash{position:absolute;inset:0;background:#D7261E;opacity:0;pointer-events:none;z-index:50}
+</style></head><body>
+<div id="stage"><div id="flash"></div></div>
+<script>
+const SPEC = JSON.parse(document.getElementById('spec').textContent);
+const B = VP.clock(SPEC.bpm);
+const { sp, ramp, clamp, lerp, SPR } = VP;
+const stage = document.getElementById('stage'), flash = document.getElementById('flash'), NS = 'http://www.w3.org/2000/svg';
+const INK = '#111', RED = '#D7261E', CREAM = '#F1E9D8';
+const f1 = v => v.toFixed(1);
+const E = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const rl = (css, html, inner) => { const d = document.createElement('div'); d.className = 'roll'; d.style.cssText = css; d.innerHTML = `<div style="${inner}">${html}</div>`; stage.appendChild(d); return d; };
+const rollK = (r, k) => VP.roll(r.firstElementChild, k, r.offsetHeight);
+
+/* ---------- SVG scene (everything that can shake lives in `world`) ---------- */
+const svg = E('svg', { width: 1080, height: 1080, viewBox: '0 0 1080 1080' }); svg.style.cssText = 'position:absolute;left:0;top:0'; stage.insertBefore(svg, flash);
+const defs = E('defs', {}, svg); E('rect', { x: 0, y: 700, width: 1080, height: 240 }, E('clipPath', { id: 'gc' }, defs));
+const world = E('g', {}, svg);
+const GY = 940;                                                                   // top of the black ground band
+const band = E('rect', { x: -40, y: GY, width: 1160, height: 260, fill: INK }, world);
+
+/* the one above: a red monolith, black crown */
+const king = E('g', {}, world);
+E('rect', { x: 650, y: 330, width: 50, height: 330, rx: 24, fill: RED }, king); E('rect', { x: 1000, y: 330, width: 50, height: 330, rx: 24, fill: RED }, king);
+E('rect', { x: 690, y: 250, width: 320, height: 520, rx: 34, fill: RED }, king);
+const kHead = E('g', {}, king); E('circle', { cx: 850, cy: 168, r: 72, fill: RED }, kHead);
+const crown = E('polygon', { points: '780,112 790,38 820,84 850,22 880,84 910,38 920,112', fill: INK }, kHead);
+
+/* the crowd below: 3 people, stomped at beats 15, 16, 17 */
+const STOMPS = [15, 16, 17], AMP = [5, 8, 13], FL = [.05, .08, .14], V0 = 100, PX = 400;
+const pg = E('g', { 'clip-path': 'url(#gc)' }, world);
+const people = STOMPS.map(() => { const g = E('g', {}, pg); const head = E('circle', { cx: 0, cy: -62, r: 22, fill: INK }, g), body = E('rect', { x: -25, y: -44, width: 50, height: 44, rx: 20, fill: INK }, g);
+  const burst = E('g', {}, pg); const ls = [...Array(7)].map(() => E('line', { stroke: RED, 'stroke-width': 6, 'stroke-linecap': 'round' }, burst)); return { g, head, body, burst, ls }; });
+
+/* bike + cyclist (all black) */
+const rig = E('g', {}, world), WR = 100, WY = 725, BB = [400, 760], HIP = [325, 555];
+const wheel = () => { const g = E('g', {}, rig); E('circle', { r: WR, fill: 'none', stroke: INK, 'stroke-width': 12 }, g); E('circle', { r: 9, fill: INK }, g); E('line', { x1: 0, y1: -WR + 6, x2: 0, y2: -WR + 34, stroke: RED, 'stroke-width': 10, 'stroke-linecap': 'round' }, g); return g; };
+const wr = wheel(), wf = wheel();
+E('polyline', { points: `250,${WY} 335,575 ${BB} 250,${WY}`, fill: 'none', stroke: INK, 'stroke-width': 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+E('polyline', { points: `335,575 500,580 ${BB} 500,580 530,${WY}`, fill: 'none', stroke: INK, 'stroke-width': 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+E('polyline', { points: '500,580 520,545 560,540', fill: 'none', stroke: INK, 'stroke-width': 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+E('line', { x1: 305, y1: 568, x2: 358, y2: 568, stroke: INK, 'stroke-width': 14, 'stroke-linecap': 'round' }, rig);
+const limb = (col, w) => ({ crank: E('line', { stroke: INK, 'stroke-width': 8, 'stroke-linecap': 'round' }, rig), pedal: E('rect', { width: 72, height: 16, rx: 6, fill: INK }, rig), leg: E('polyline', { fill: 'none', stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig) });
+const far = limb('#5b5b5b', 24), near = limb(INK, 26);
+const torso = E('path', { fill: 'none', stroke: INK, 'stroke-width': 28, 'stroke-linecap': 'round' }, rig);
+const arm = E('polyline', { fill: 'none', stroke: INK, 'stroke-width': 24, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, rig);
+const head = E('circle', { r: 32, fill: INK }, rig);
+const arrow = E('g', {}, world); E('line', { x1: 250, y1: 345, x2: 560, y2: 485, stroke: INK, 'stroke-width': 3, 'stroke-linecap': 'round' }, arrow);
+E('polygon', { points: '575,492 548,490 556,470', fill: INK }, arrow);
+
+/* ---------- text ---------- */
+const title = document.createElement('div'); title.className = 'a'; title.style.cssText = "left:58px;top:36px;font-family:Archivo,sans-serif;font-weight:900;font-variation-settings:'wdth' 118;font-size:86px;line-height:1.05;letter-spacing:-.02em;color:#111;white-space:nowrap";
+title.innerHTML = [...'RADFAHRER'].map(ch => `<span class="mask"><span>${ch}</span></span>`).join(''); stage.appendChild(title);
+const bar = E('rect', { x: 62, y: 134, width: 110, height: 12, fill: RED }, svg);
+const sub = rl('left:62px;top:156px;width:600px;height:48px', 'người đạp xe', 'font-size:34px;font-weight:600;line-height:48px;color:#111');
+const lab = rl('left:62px;top:290px;width:520px;height:46px', 'cúi lưng trước kẻ trên', 'font-size:32px;font-weight:600;line-height:46px;color:#111');
+const cap = rl('left:0;top:978px;width:1080px;height:70px', 'đạp xuống kẻ dưới', `font-size:44px;font-weight:600;line-height:70px;color:${CREAM};text-align:center`);
+const ger = rl('left:0;top:962px;width:1080px;height:60px', 'nach oben <span class="red">buckeln</span>, nach unten <span class="red">treten</span>', `font-family:Archivo,sans-serif;font-weight:800;font-size:46px;line-height:60px;color:${CREAM};text-align:center`);
+const tr = rl('left:0;top:1024px;width:1080px;height:40px', 'cúi lưng lên trên, đạp xuống dưới', 'font-size:28px;font-weight:500;line-height:40px;color:#CFC6B2;text-align:center');
+
+/* ---------- motion ---------- */
+const STEP = 1 / 120, PH = new Float64Array(30 * 120 + 2);          // pedalling phase: slow while approaching, full cadence (1 half-turn per beat) from 14.5
+const cad = b => b < 6.5 ? 0 : b < 8 ? .5 * VP.ease((b - 6.5) / 1.5) : b < 12.5 ? .5 : b < 14.5 ? lerp(.5, 1, VP.ease((b - 12.5) / 2)) : 1;
+for (let i = 1; i < PH.length; i++) PH[i] = PH[i - 1] + cad(i * STEP) * STEP;
+const PHI = b => { const x = Math.max(0, b) / STEP, i = Math.floor(x); return PH[i] + (PH[Math.min(i + 1, PH.length - 1)] - PH[i]) * (x - i); };
+const ik = (hip, foot, L1, L2) => { const dx = foot[0] - hip[0], dy = foot[1] - hip[1], d = Math.min(Math.hypot(dx, dy), L1 + L2 - .01), ux = dx / d, uy = dy / d;
+  const a = (L1 * L1 - L2 * L2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, L1 * L1 - a * a)); return [hip[0] + ux * a + uy * h, hip[1] + uy * a - ux * h]; };
+const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [0, 1].map(k => u * u * u * p0[k] + 3 * u * u * t * p1[k] + 3 * u * t * t * p2[k] + t * t * t * p3[k]); };
+const L2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+
+function frame(t) {
+  const b = VP.at(t);
+  /* title slams in letter by letter, hard */
+  title.querySelectorAll('.mask>span').forEach((w, k) => { const e = VP.eOutQuint(ramp(.3 + k * .14, .3 + k * .14 + .55, x => x)); w.style.transform = `translateY(${((1 - e) * -140).toFixed(2)}%)`; });
+  bar.setAttribute('transform', `scale(${clamp(VP.eOutQuint(ramp(1.7, 2.4, x => x))).toFixed(3)} 1)`); bar.setAttribute('transform-origin', '62 134'); bar.style.transformOrigin = '62px 134px';
+  rollK(sub, sp(2.2, ...SPR.SNAP)); rollK(lab, sp(11.0, ...SPR.SNAP)); rollK(cap, sp(15.4, ...SPR.SNAP) + sp(20.6, ...SPR.SNAP)); rollK(ger, sp(21.0, ...SPR.SNAP)); rollK(tr, sp(22.0, ...SPR.SNAP));
+  /* stomp shake + flash */
+  let sx = 0, sy = 0, fl = 0; STOMPS.forEach((ts, i) => { const u = (b - ts) * B; if (u >= 0) { const d = Math.exp(-u * 18); sx += AMP[i] * d * Math.sin(u * 90); sy += AMP[i] * .6 * d * Math.cos(u * 70); fl = Math.max(fl, FL[i] * Math.exp(-u * 14)); } });
+  world.setAttribute('transform', `translate(${f1(sx)} ${f1(sy)})`); flash.style.opacity = fl.toFixed(3);
+  /* ground band rises, king mounts from below, crown rattles, king tilts back at the end */
+  band.setAttribute('transform', `translate(0 ${f1((1 - VP.eOutQuint(ramp(2.4, 3.4, x => x))) * 260)})`);
+  const rise = (1 - sp(3.2, 1.3, .7)) * 900, ku = Math.max(0, (b - 4.4) * B), tilt = sp(17.6, 1.4, .8);
+  king.setAttribute('transform', `translate(0 ${f1(rise)})`); king.style.display = b > 3.1 ? 'block' : 'none';
+  kHead.setAttribute('transform', `rotate(${(-5 * tilt).toFixed(2)} 850 240)`);
+  crown.setAttribute('transform', `rotate(${(8 * Math.exp(-3 * ku) * Math.sin(16 * ku)).toFixed(2)} 850 112)`);
+  /* bike rolls in, cyclist pedals */
+  const dx = -700 * (1 - VP.eOut(ramp(5.5, 8.5, x => x))); rig.setAttribute('transform', `translate(${f1(dx)} 0)`); rig.style.display = b > 5.4 ? 'block' : 'none';
+  const rot = ((dx + 700) / WR + 1.6 * Math.PI * PHI(b)) * 180 / Math.PI;
+  wr.setAttribute('transform', `translate(250 ${WY}) rotate(${f1(rot)})`); wf.setAttribute('transform', `translate(530 ${WY}) rotate(${f1(rot)})`);
+  const th = Math.PI / 2 + Math.PI * (PHI(b) - PHI(15)), R = 90;
+  [[near, th], [far, th + Math.PI]].forEach(([l, a]) => { const px = BB[0] + R * Math.cos(a), py = BB[1] + R * Math.sin(a), knee = ik(HIP, [px, py - 10], 160, 160);
+    l.crank.setAttribute('x1', BB[0]); l.crank.setAttribute('y1', BB[1]); l.crank.setAttribute('x2', f1(px)); l.crank.setAttribute('y2', f1(py));
+    l.pedal.setAttribute('x', f1(px - 36)); l.pedal.setAttribute('y', f1(py - 8)); l.leg.setAttribute('points', `${HIP[0]},${HIP[1]} ${f1(knee[0])},${f1(knee[1])} ${f1(px)},${f1(py - 10)}`); });
+  /* the bow: lean back first (anticipation), then fold down onto the king — slow and heavy */
+  const bow = VP.track([[0, 0], [9.4, -.25, 1.8, .9], [10.4, 1.0, 1.1, .75]]);
+  const N = L2([385, 430], [560, 490], bow), c1 = L2([330, 500], [345, 470], bow), c2 = L2([345, 450], [450, 440], bow), hd = L2([405, 385], [612, 515], bow);
+  torso.setAttribute('d', `M${HIP[0]} ${HIP[1]} C${f1(c1[0])} ${f1(c1[1])} ${f1(c2[0])} ${f1(c2[1])} ${f1(N[0])} ${f1(N[1])}`);
+  const S = bez(HIP, c1, c2, N, .62); arm.setAttribute('points', `${f1(S[0])},${f1(S[1])} 556,545`);
+  head.setAttribute('cx', f1(hd[0])); head.setAttribute('cy', f1(hd[1]));
+  arrow.setAttribute('opacity', clamp((b - 11.3) / .3).toFixed(2)); arrow.setAttribute('transform', `translate(${f1((1 - VP.eOutQuint(ramp(11.2, 11.9, x => x))) * -40)} 0)`);
+  /* the crowd: three people walk in; each is stomped flat, turns red, slides away */
+  people.forEach((p, i) => { const ts = STOMPS[i], x = PX + V0 * (ts - b), uu = (b - ts) * B;
+    const s = uu < 0 ? 1 : 1 - .86 * VP.spring(uu, 3.4, .55), hop = uu < 0 ? -6 * Math.abs(Math.sin(Math.PI * (b - ts))) : 0, sxx = lerp(1, 1.7, (1 - s) / .86);
+    p.g.setAttribute('transform', `translate(${f1(x)} ${f1(GY + hop)}) scale(${sxx.toFixed(3)} ${Math.max(.05, s).toFixed(3)})`);
+    const red = uu >= 0 ? 1 : 0; p.head.setAttribute('fill', red ? RED : INK); p.body.setAttribute('fill', red ? RED : INK);
+    const d = uu >= 0 && uu < .32 ? uu / .32 : -1;
+    p.ls.forEach((ln, k) => { const ang = Math.PI * (1.08 + .84 * k / 6), r0 = 40 + 120 * Math.max(0, d), r1 = r0 + 26;
+      ln.setAttribute('x1', f1(x + r0 * Math.cos(ang))); ln.setAttribute('y1', f1(GY - 20 + r0 * Math.sin(ang))); ln.setAttribute('x2', f1(x + r1 * Math.cos(ang))); ln.setAttribute('y2', f1(GY - 20 + r1 * Math.sin(ang))); });
+    p.burst.setAttribute('opacity', d < 0 ? 0 : (1 - d).toFixed(2)); });
+}
+/* sound: dry, with silence as part of the rhythm — escalating stomps, then the joke */
+function cues() { return [{ beat: 3.9, type: 'boom', gain: -16 }, { beat: 5.5, type: 'swoosh', gain: -20 },
+  { beat: 15, type: 'punch', gain: -22 }, { beat: 16, type: 'punch', gain: -18 }, { beat: 17, type: 'punch', gain: -13 }, { beat: 17, type: 'hit', gain: -17 },
+  { beat: 21.8, type: 'womp', gain: -19 }]; }
+VP.boot({ seek: frame, dur: SPEC.dur * B, cues, fonts: ['900 100px Archivo', '800 46px Archivo', '600 40px "Be Vietnam Pro"'] });
+window.SIZE = [1080, 1080]; window.BPM = SPEC.bpm; window.B = B;
+</script></body></html>

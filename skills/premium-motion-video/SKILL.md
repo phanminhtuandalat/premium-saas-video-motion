@@ -12,7 +12,7 @@ Every frame is a pure function of time `seek(t)`: the same HTML plays live, rend
 and can be reviewed as a contact sheet in seconds.
 
 Full toolkit (engine, templates, renderer, audio tools, worked examples) lives in the user's repo
-**VideoPremium Intro** (`/Users/danghuuson/OPEN SOURCE VIBE CODE/VideoPremium Intro`):
+**VideoPremium Intro** (`C:/Users/PHANMINHTUAN/Documents/Videomotion/premium-saas-video-motion`):
 `engine/motion.js`, `templates/kinetic-promo` (JSON-driven Apple-style promo, any aspect),
 `templates/keynote-oneshot` (one continuous take), `examples/globalspeak` (60 s SaaS film, mode A: rebuilt interactive UI),
 `examples/globalspeak-real` (same product, mode B: real screenshots only), `examples/aibannerpro` (dark SaaS, mode A + illustrative outputs),
@@ -21,7 +21,7 @@ Full toolkit (engine, templates, renderer, audio tools, worked examples) lives i
 `templates/ui-loops` (8 product-UI micro-loops, 8 s seamless loop: 4:5 board or `?fx=N` single 1:1 effect, `?poster`),
 `tools/render.mjs · sheet.mjs · capture.mjs · beatgrid.py · cues.mjs · mix.py · popcheck.py`,
 `assets/audio/` (embedded music + SFX library with pre-computed BPM/drops in `library.json`, default `sfx.json`),
-`skills/premium-motion-video/references/` (aesthetics, motion-cookbook, pipeline, gotchas, reference-leo, reference-ui-loops).
+`skills/premium-motion-video/references/` (aesthetics, motion-cookbook, pipeline, gotchas, reference-leo, reference-ui-loops, tts-integration, windows-setup, prompt-and-review).
 If the repo is reachable, use it. If not, the minimal engine + renderer at the end of this file are enough.
 
 ## Step −1 — Post a checklist before doing anything
@@ -88,6 +88,14 @@ phrasing (end on a bar/phrase boundary, e.g. 100 beats) and the VO decide; never
 If the session is unattended, use defaults — mode C, 16:9 + 9:16, the language of the user's prompt, no VO — and state
 them at the top of the delivery.
 
+## Spec first — a second-accurate shot list (after the intake, before any build)
+Turn the answers into `<film>/video-spec.md` — one table, one row per shot, so every later gate has something to check against:
+| # | t0–t1 (s or beat) | on screen (what, where, hero motion) | VO line | sound (music · sfx) | cut to next |
+Fill the three things vague briefs leave out: **audience + platform + length**, the **one message** a viewer must keep, and **counter-examples**
+("not slick/corporate — dry, a bit mean"). Push back on empty words ("premium", "dynamic") by asking for a reference or a number.
+When the user changes something, edit the row and check whether the neighbouring shots still work (timing, cut, VO) before touching code.
+Data films: this table is also the figure-by-figure sign-off table of step 5.
+
 ## Screens phase — capture first, build second (all modes)
 Every mode starts from real screens collected into ONE folder (`<film>/capture/{desktop,mobile}/*.png` + `manifest.json`):
 mode B/C use them in the film, mode A uses them as the reference to rebuild from.
@@ -125,9 +133,21 @@ motion (button press, card grow, number count, cursor). Illustrative data only w
    good_for, BPM, drop, breakdowns, energy per bar — no re-analysis needed) or the user's file (`tools/beatgrid.py`); set film BPM =
    song BPM, put the hero moment on the drop / energy lift, splice bars only with matching bar phase
    (`film_beat % 4 == track_beat % 4`). With VO: fix the VO length first, then fit the music to it.
+   **No track with a licence you can ship?** Write an original one: `python3 tools/synthmusic.py --bpm <film bpm> --beats <film beats + 2> --mood corporate|tense|minimal|playful --lift <drop beat> --out out/music.wav`
+   (numpy only; composed on the film's own beat grid so no splicing; drums + arpeggio enter at `--lift`, ≈ +4 dB; true peak −3 dB; pass it to `mix.py --music`).
+   It is a bed, not a hit — keep it under SFX/voice, and listen before delivering (the tool cannot judge taste).
 5. **Beat map + stills** (FYI, not a gate): table beat | VO line | music | image | sfx, plus 3–4 stills. Send it and
    keep building; fold any reply into the next round.
-6. **Build → contact sheet** (`sheet.mjs --every 2`, then `--every 0.5` around transitions). Fix everything visible.
+   **Data films (numbers are the content) — the one exception: make it a gate.** Before building, send the table
+   scene | number as it will read on screen | VO phrase | source figure, and wait for OK (a wrong figure costs a full re-render and a
+   wrong claim). Keep every figure in ONE file (`<film>/data.js` → `window.DATA`); the film code never types a number.
+6. **Build → contact sheet** (`sheet.mjs --every 2`, then `--every 0.5` around transitions; add `--safe` for 9:16 to overlay the
+   platform-UI zones — top 11.5 %, bottom 20 %, right 11 % — and keep text/captions out of them or say so). Fix everything visible.
+   **Always:** `node tools/audit.mjs <film>/index.html` on SETTLED moments (the film lists them in `window.AUDIT = {beats, safe, safeExempt, minFont}`):
+   exit 1 on text overlapping text, cut off horizontally, off the canvas or outside the safe area; warns on effective font < 26 px.
+   Only "visible" text counts (a scene covered by the next one is ignored); line boxes are measured on the glyph band so tight headlines don't false-alarm.
+   **Data films:** `node tools/checkdata.mjs <film>/index.html` — every figure in `window.EXPECT` (copied BY HAND from the source
+   text, never generated from DATA) must be on screen at its beat, plus the arithmetic identities. Exit 1 = do not render.
 7. **Preview render** (half size, 30 fps) → **final** (60 fps, 2 sub-frames motion blur) with audio →
    `popcheck.py` (0 pops, loop seam) → loudness ≈ −14 LUFS → deliver MP4 + HTML source.
 
@@ -136,14 +156,29 @@ motion (button press, card grow, number count, cursor). Illustrative data only w
    (60 s ≈ 140–160 words incl. pauses); English ≈ 2.5 words/s. Leave 1.5–2 s of VO-free air on the logo/CTA.
 2. **Get the audio.** ElevenLabs: list voices, pick the one the user chose (or the closest match to their description and
    say which), generate per scene/sentence (easier to retime) or one take; save to `<film>/audio/vo/`. Self-upload: read
-   it from the chat upload or `<film>/audio/vo/`.
-3. **Timings.** Transcribe with word timestamps (ElevenLabs speech-to-text, Whisper, or the TTS alignment output) →
-   `vo.json` `[{t0, t1, text}]`. Scene starts snap to sentence starts rounded to the nearest beat; key words land on
-   visuals (the number counts up as the VO says it). Pick music BPM/splice after the VO length is known.
+   it from the chat upload or `<film>/audio/vo/`. Local Vietnamese TTS (VieNeu Studio, `POST :8001/api/tts`) is free and fast, but
+   it mispronounces foreign words and brand names: write the Vietnamese respelling into the TTS text (keep the true spelling on screen),
+   or voice those lines with ElevenLabs (multilingual) and cut them into the same timeline. Always spell numbers out in words for TTS.
+3. **Timings.** Get word timestamps — never estimate by character count. Local, no key:
+   `python3 tools/wordtimes.py <film>/audio/vo --script <film>/audio/vo/vo-raw.json --out <film>/words.js`
+   (faster-whisper; your KNOWN script is aligned onto Whisper's clock, so on-screen words are exactly yours; one clip per
+   sentence, `pip install faster-whisper`, first run downloads the model). The film loads `words.js` (`window.WORDS`) and
+   anchors visuals to phrases (`phr('s4','ba mươi sáu phẩy bảy phần trăm')` → [startBeat, endBeat]); counters END when the voice
+   finishes the number. Scene starts snap to sentence starts rounded to the nearest beat. Pick music BPM/splice after the VO
+   length is known. Whisper writes digits for spoken numbers, so those words are interpolated between matched neighbours — fine
+   for a phrase window, don't rely on single-syllable precision there.
 4. **Mix.** VO is the lead: music ducked 8–12 dB under speech (e.g. ffmpeg
    `[music][vo]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=400`), SFX lighter than without VO, final
    loudness ≈ −14 LUFS with VO peaks ≈ −1.5 dBTP. Check intelligibility on laptop speakers.
-5. Optional burned-in subtitles from `vo.json` (Vietnamese: keep diacritics, ≤ 2 lines, ≥ 44 px at 1080p).
+5. Burned-in karaoke captions come free from `words.js` (Vietnamese: keep diacritics, ≤ 2 lines, ≥ 44 px at 1080p; pages split at
+   punctuation, current word highlighted; `"captions": false` in the film's spec turns them off). In 9:16 captions sit in the
+   bottom platform-UI zone — check with `sheet.mjs --safe` and tell the user.
+
+## Brief, critique and continuity — see references/prompt-and-review.md
+- Spec opens with the 9-layer brief (role · goal · format · story · art direction · motion language · negatives · technical limits · QA loop).
+- After the first build, switch to a critic role: findings by category, with timestamps, ranked P0 / P1 / P2; fix P0 → P1, one named defect per round.
+- Pick 2–3 transition families and one recurring motif; bridge scenes with an object already on screen.
+- 3D (Three.js) only when it has a job: `engine/scene3d.js`, shot type `scene3d`, camera and particles are pure functions of the beat (`VP.rng`, no Clock/mixer).
 
 ## Style comes from the brand, not from a house style
 The first design decision is the **style family**, read from the brand: fonts, textures, illustration assets,
@@ -247,6 +282,13 @@ ease. It speeds authoring, not rendering.
 - Reference: 20 s 1080p60 ≈ 2.5 min, 62 s ≈ 8 min, 8 s 1080×1350 SVG loop board ≈ 1.5 min on 2 cores;
   60 s film with many scenes ≈ 10–11 min on a 2-core cloud sandbox.
 
+## TTS Integration (Vietnamese)
+- Use VieNeu Studio at http://127.0.0.1:8001 (see `vieneu-tts` skill)
+- Split script into shot-length clips, generate per-shot TTS, merge with ffmpeg concat
+- Edit `<script id="spec">` in template HTML to match content beats
+- See `references/tts-integration.md` for full workflow and timing formula
+- **Pitfall**: Convert decimal numbers to words for natural TTS pronunciation ("9.01%" → "9 điểm 01 phần trăm")
+
 ## Gotchas that cost real renders
 1. Clamp every ramp to 0..1 (an unclamped cubic ramp made a logo scale to −21 000).
 2. Never write tiny floats into CSS/SVG: `1e-7px` is silently ignored and the old clip/transform sticks. Round everything.
@@ -271,6 +313,11 @@ ease. It speeds authoring, not rendering.
     chunks and the final mp4 → corrupt file. Check `ps` first; one `nohup` render, then poll its log.
 17. Cloud sandboxes ship a fixed Chromium (`/opt/pw-browsers`); pin the playwright npm version that matches it instead
     of running `playwright install`. Emoji and rare glyphs (✓ ★ ●) may be missing in headless Chromium — draw them as SVG.
+18. A background / chunked render can exit 0 having written only PART of the chunks (no final mp4) on Windows — the
+    "completed normally (exit code 0)" notification is NOT proof of a finished film. After every render verify BOTH:
+    the output file exists AND the chunk count in `out/<film>/.render-<name>/` equals the total. If partial, just re-run
+    the SAME command (the chunked renderer resumes); on Windows a synchronous `execute_code`/`subprocess.run([...],
+    cwd=repo, timeout=900)` is more reliable here than a fire-and-forget background process.
 
 ## Iterating with the user
 When a result is close, fix ONE named defect per round and keep motion, timing and loop exactly as they are; say what
@@ -309,7 +356,9 @@ worker per core; concat; `-vf "tmix=frames=2,select='not(mod(n+1\,2))',setpts=N/
 
 ## Verification before saying "done"
 Checklist reported (all ✅ or explained) · intake answers honoured (mode · format(s) · language · VO · length ±) ·
-VO intelligible and in sync (if any) · CTA end shot has the click interaction · Contact sheet reviewed · preview watched ·
+VO intelligible and in sync (if any; visuals anchored to real word timestamps) · `audit.mjs` 0 errors (warnings explained) ·
+data films: `checkdata.mjs` passes · motion judged against `references/timing-easing.md` · critic pass done (no open P0/P1) ·
+CTA end shot has the click interaction (or the user chose a question/lockup ending) · Contact sheet reviewed · preview watched ·
 0 pops (hard cuts on purpose excepted) · ≈ −14 LUFS · loop seam ≈ 0 if it loops · size under the delivery limit ·
 HTML still plays live (Space pause, ←/→ one beat) · illustrative data and licence caveats stated · model notice given ·
 for loops/social: reads when paused (poster frame) and every word fits at every frame.
