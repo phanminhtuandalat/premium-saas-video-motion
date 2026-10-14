@@ -205,6 +205,9 @@ fonts and real assets (logo, characters, screenshots, sample outputs) always win
 - Mix time feels: smooth 60 fps springs for camera/UI, stepped 8–12 fps for hand-made elements (boil, stop-motion).
 - Give every scene one "hero" motion and at most two supporting ones.
 
+## Explainer figures — skill `anatomy`
+For a scene that explains a technical idea (cache, queue, rate limiter, sensor loop) as a physical machine, use the sibling skill `skills/anatomy/` (`/anatomy <description>`). Output is standalone HTML/SVG; bring it into a film as a still or footage frames (`tools/clipframes.mjs`) or re-draw it with `VP.*` so every frame stays a function of `seek(t)`. It does not draw charts or people.
+
 ## UI micro-loops (format and scene kit) — see references/reference-ui-loops.md
 - Each effect is `draw(w, h, id, S)` with `S = VP.cycle(t, {F:2.2, H:4.4, R:1.4, loop:8, offset})`:
   slow eased forward, long hold where ONE thing stays alive, faster return; F+H+R = loop → exact seam.
