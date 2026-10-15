@@ -15,7 +15,7 @@ html,body{margin:0;background:#f5ebd7}
 #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#f5ebd7;font-family:"Be Vietnam Pro",sans-serif;color:#2c2c2c}
 #stage:before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 40%,rgba(255,255,255,.35),rgba(120,90,40,.10));pointer-events:none}
 svg#board{position:absolute;left:0;top:330px;width:1080px;height:950px;overflow:visible}
-.ttl{position:absolute;left:60px;width:960px;top:256px;font-size:58px;font-weight:800;line-height:1.12}
+.ttl{position:absolute;left:60px;width:960px;top:274px;font-size:58px;font-weight:800;line-height:1.12}
 #brand{position:absolute;left:60px;top:224px;font-size:30px;font-weight:700;letter-spacing:.2em;color:#e0533d}
 #cap{position:absolute;left:60px;width:960px;top:1327px;font-size:56px;font-weight:700;line-height:1.28;text-align:center}
 #cap span{color:#4a4a4a}#cap span.on{color:#e0533d}#cap span.done{color:#1f1f1f}
@@ -27,6 +27,7 @@ svg#board{position:absolute;left:0;top:330px;width:1080px;height:950px;overflow:
  <div class="ttl" id="tA">Phun mưa: <span style="color:#e0533d">nước đi mất</span></div>
  <div class="ttl" id="tB" style="opacity:0">Nhỏ giọt: <span style="color:#2f7fd1">nước ở lại gốc</span></div>
  <svg id="board" viewBox="0 0 1080 950"><g id="gA"></g><g id="gB"></g></svg>
+<svg id="grain" width="1080" height="1920" style="position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.18"><filter id="nz"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .18  0 0 0 .9 0"/></filter><rect width="1080" height="1920" filter="url(#nz)"/></svg>
  <div id="cap"></div>
 </div>
 <script>
@@ -38,7 +39,7 @@ const NS = 'http://www.w3.org/2000/svg';
 const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
 const line = (g, d, color = INK, w = 7) => mk('path', { d, fill: 'none', stroke: color, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
 const shape = (g, d, fill, color = INK, w = 7) => mk('path', { d, fill, stroke: color, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
-const label = (g, x, y, s, color, size = 52) => { const t = mk('text', { x, y, 'font-size': size, fill: color, 'text-anchor': 'middle', class: 'hand', 'paint-order': 'stroke', stroke: '#f5ebd7', 'stroke-width': 10 }, g); t.textContent = s; return t; };
+const label = (g, x, y, s, color, size = 66) => { const t = mk('text', { x, y, 'font-size': size, fill: color, 'text-anchor': 'middle', class: 'hand', 'paint-order': 'stroke', stroke: '#f5ebd7', 'stroke-width': 10 }, g); t.textContent = s; return t; };
 const gA = document.getElementById('gA'), gB = document.getElementById('gB'), board = document.getElementById('board');
 
 /* shared plant + roots; scene A and B draw their own copies */
@@ -66,9 +67,9 @@ itemsA.push({ el: mk('circle', { cx: 200, cy: 340, r: 26, stroke: INK, 'stroke-w
 [700, 800, 900].forEach((x, i) => itemsA.push({ el: line(gA, `M${x} 560 q 22 -30 0 -60 q -22 -30 0 -60`, RED, 7), a: 4.3 + i * 0.35, d: 0.6 }));
 itemsA.push({ el: label(gA, 800, 410, 'bốc hơi', RED), a: 5.5, d: 0.4, type: 'text' });
 itemsA.push({ el: line(gA, 'M420 608 C520 624 640 630 760 642 C860 652 940 662 1010 700', BLUE, 8), a: 5.9, d: 1.0 });
-itemsA.push({ el: label(gA, 740, 700, 'chảy đi', BLUE), a: 6.7, d: 0.4, type: 'text' });
+itemsA.push({ el: label(gA, 860, 770, 'chảy đi', BLUE), a: 6.7, d: 0.4, type: 'text' });
 itemsA.push({ el: mk('path', { d: 'M410 700 a130 100 0 1 0 260 0 a130 100 0 1 0 -260 0', fill: 'none', stroke: ORANGE, 'stroke-width': 8, 'stroke-linecap': 'round' }, gA), a: 7.4, d: 1.2 });
-itemsA.push({ el: label(gA, 540, 860, 'rễ chỉ cần chỗ này', ORANGE, 56), a: 8.7, d: 0.5, type: 'text' });
+itemsA.push({ el: label(gA, 540, 860, 'rễ chỉ cần chỗ này', ORANGE, 64), a: 8.7, d: 0.5, type: 'text' });
 
 /* ---- scene B: drip ---- */
 const itemsB = [];
@@ -78,8 +79,8 @@ ground(gB, itemsB, 10.3);
 plant(gB, itemsB, 10.8);
 itemsB.push({ el: line(gB, 'M120 330 L960 330', INK, 10), a: 11.9, d: 0.6 });
 itemsB.push({ el: shape(gB, 'M528 332 L528 366 L552 366 L552 332', GREY), a: 12.4, d: 0.35, fill: GREY });
-itemsB.push({ el: label(gB, 540, 300, 'ngay tại gốc', BLUE, 56), a: 13.2, d: 0.5, type: 'text' });
-itemsB.push({ el: label(gB, 540, 880, 'giữ ẩm ở vùng rễ', BLUE, 56), a: 16.2, d: 0.5, type: 'text' });
+itemsB.push({ el: label(gB, 540, 300, 'ngay tại gốc', BLUE, 68), a: 13.2, d: 0.5, type: 'text' });
+itemsB.push({ el: label(gB, 540, 880, 'giữ ẩm ở vùng rễ', BLUE, 64), a: 16.2, d: 0.5, type: 'text' });
 const dropEls = [0, 1, 2].map(() => mk('path', { d: 'M0 -22 C16 -2 14 14 0 14 C-14 14 -16 -2 0 -22Z', fill: BLUE }, gB));
 
 const seqA = WB.sequence(itemsA), seqB = WB.sequence(itemsB);

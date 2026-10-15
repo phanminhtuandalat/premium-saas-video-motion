@@ -15,10 +15,32 @@
   const ease = (x) => x * x * (3 - 2 * x);
   const WB = {};
 
-  WB.sequence = (items, { fillDur = 0.5 } = {}) => {
-    const prepared = items.map((it) => {
+  /* Hand wobble: resample a <path> every `step` px and push each point sideways by a smooth, seeded wobble
+   * (sum of two sines over arc length), fading to 0 at both ends so closed shapes still meet. Deterministic. */
+  WB.wobble = (el, { amp = 2.2, seed = 1, step = 5 } = {}) => {
+    if (!el.getTotalLength || el.tagName !== 'path') return;
+    const total = el.getTotalLength();
+    if (total < 12) return;
+    const closed = /z\s*$/i.test(el.getAttribute('d') || '');
+    const n = Math.max(3, Math.ceil(total / step));
+    const p1 = seed * 1.7, p2 = seed * 4.3, pts = [];
+    for (let i = 0; i <= n; i++) pts.push(el.getPointAtLength((total * i) / n));
+    const out = pts.map((p, i) => {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n, i + 1)];
+      let tx = b.x - a.x, ty = b.y - a.y; const m = Math.hypot(tx, ty) || 1; tx /= m; ty /= m;
+      const s = (total * i) / n;
+      const w = Math.min(1, s / 18, (total - s) / 18);
+      const k = amp * w * (Math.sin(s * 0.043 + p1) + 0.6 * Math.sin(s * 0.117 + p2)) / 1.6;
+      return [p.x - ty * k, p.y + tx * k];
+    });
+    el.setAttribute('d', 'M' + out.map((q) => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L') + (closed ? 'Z' : ''));
+  };
+
+  WB.sequence = (items, { fillDur = 0.5, wobble = 2.2 } = {}) => {
+    const prepared = items.map((it, idx) => {
       const el = it.el, text = it.type === 'text';
       let len = 0;
+      if (!text && wobble && it.wobble !== false) WB.wobble(el, { amp: it.wobble || wobble, seed: idx + 1 });
       if (!text) {
         len = el.getTotalLength ? el.getTotalLength() : 0;
         el.setAttribute('stroke-dasharray', len + ' ' + (len + 2));

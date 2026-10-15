@@ -35,3 +35,9 @@ Quy trình áp dụng:
 4. Kiểm tra bằng `sheet.mjs --safe`, `audit.mjs`, `popcheck.py` như thường lệ.
 
 Còn thiếu so với skill gốc: bảng xem trước để kéo thả vùng, đọc SRT trực tiếp, và nét vẽ theo đường xương của ảnh có sẵn. Muốn vẽ từ một ảnh bất kỳ thì vẫn cần skill gốc.
+
+## Nâng cấp đã làm (15/10/2026)
+- **Nét rung tay:** `WB.wobble` lấy mẫu lại mỗi đường cong và đẩy lệch bằng sóng sin có hạt giống, tắt dần ở hai đầu nên hình khép kín vẫn khớp. Tất định. `WB.sequence(items, { wobble: 2.2 })` bật mặc định, đặt `wobble: false` ở từng phần tử để giữ nét thẳng.
+- **Chữ viết tay:** nhãn dùng font Patrick Hand (có tiếng Việt), cỡ 64–68 px để đọc được trên điện thoại.
+- **Giấy có hạt:** lớp nhiễu `feTurbulence` mờ phủ lên nền be, cố định hạt giống nên không nhấp nháy.
+- **`tools/srt2script.mjs`:** đọc file SRT và gộp thành các cảnh khoảng 30 giây (cắt ở cuối câu nếu có thể), xuất JSON gồm mốc thời gian và lời. `node tools/srt2script.mjs sub.srt --target 30 --min 25 --max 35 --out script.json`. Đã thử trên một SRT mẫu 4 câu: ra 2 cảnh, 30,5 s và 8,8 s.
