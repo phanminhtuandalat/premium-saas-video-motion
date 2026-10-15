@@ -1,0 +1,291 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Vì sao tưới nhỏ giọt tiết kiệm nước — 9:16</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<script src="words.js"></script>
+<!--
+  Công thức 6 cảnh (references/short-explainer-recipe.md): Hook, Nỗi đau, Giải pháp 1, Giải pháp 2, Lợi ích, Kết.
+  Mốc cảnh S[] = lúc mỗi câu giọng đọc bắt đầu (audio/vo/*.wav, VieNeu). Phụ đề căn từ bằng words.js (Whisper).
+  Mọi khung hình là hàm thuần của t.
+-->
+<style>
+html,body{margin:0;background:#06100d}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Be Vietnam Pro",sans-serif;color:#fff;
+  background:radial-gradient(110% 60% at 50% 30%,#12251d 0%,#06100d 72%)}
+.sc{position:absolute;inset:0}
+.sc svg{position:absolute;left:0;top:330px;width:1080px;height:950px;overflow:visible}
+.ttl{position:absolute;left:60px;width:960px;top:262px;font-size:58px;font-weight:800;line-height:1.12}
+#brand{position:absolute;left:60px;top:226px;font-size:30px;font-weight:700;letter-spacing:.2em;color:#9be37a;z-index:30}
+#cap{position:absolute;left:60px;width:960px;top:1327px;font-size:56px;font-weight:700;line-height:1.28;text-align:center;
+  text-shadow:0 2px 16px rgba(0,0,0,.8);z-index:30}
+#cap span{color:#e9efe9}
+#cap span.on{color:#7fdcff}
+#cap span.done{color:#fff}
+#tick{position:absolute;left:60px;width:960px;top:1500px;height:6px;border-radius:3px;background:rgba(255,255,255,.12);z-index:30}
+#tick i{display:block;height:100%;border-radius:3px;background:#7fdcff}
+</style></head>
+<body>
+<div id="stage">
+ <div id="brand">CHI'S FARM · MỖI NGÀY MỘT CHÚT</div>
+ <div id="scenes"></div>
+ <div id="cap"></div>
+ <div id="tick"><i></i></div>
+</div>
+<script>
+const W = 1080, H = 1920, DUR = 50, FPS = 30;
+const { clamp, lerp, ease } = VP;
+const S = [0.4, 4.8, 14.47, 21.71, 30.51, 39.5];          // start of each narration line
+const LINES = ['s1', 's2', 's3', 's4', 's5', 's6'];
+const WORDS = window.WORDS || {};
+const BLUE = '#4cc3ff', GREEN = '#7bd96b', SOIL = '#6b4a32', SOIL2 = '#523824', SUN = '#ffd166', RED = '#ff6b5e';
+const ap = (t, a, d = 0.5) => ease(clamp((t - a) / d));                 // 0→1 eased appearance
+const back = (t, a, d = 0.5) => { const x = clamp((t - a) / d); const c = 1.7; return x <= 0 ? 0 : x >= 1 ? 1 : 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const set = (e, attrs) => { for (const k in attrs) e.setAttribute(k, attrs[k]); };
+const txt = (parent, x, y, s, size, fill = '#fff', weight = 800, anchor = 'middle') => { const e = mk('text', { x, y, 'font-size': size, 'font-weight': weight, fill, 'text-anchor': anchor, 'font-family': 'Be Vietnam Pro' }, parent); e.textContent = s; return e; };
+
+/* ---------- shared drawing helpers ---------- */
+const soilBlock = (g, x, y, w, h) => {
+  mk('rect', { x, y, width: w, height: h, rx: 28, fill: SOIL }, g);
+  mk('rect', { x, y: y + h * 0.55, width: w, height: h * 0.45, rx: 28, fill: SOIL2 }, g);
+  mk('rect', { x, y, width: w, height: 22, rx: 11, fill: '#3f7d37' }, g);
+};
+const plant = (g, x, y, s = 1) => {
+  const p = mk('g', { transform: `translate(${x} ${y}) scale(${s})` }, g);
+  mk('path', { d: 'M0 0 C0 -40 0 -70 0 -110', stroke: GREEN, 'stroke-width': 10, 'stroke-linecap': 'round', fill: 'none' }, p);
+  mk('path', { d: 'M0 -70 C-50 -80 -70 -110 -62 -140 C-30 -130 -8 -105 0 -70Z', fill: GREEN }, p);
+  mk('path', { d: 'M0 -92 C48 -100 70 -128 64 -160 C30 -150 6 -128 0 -92Z', fill: '#9be37a' }, p);
+  return p;
+};
+const roots = (g, x, y, spread = 1) => {
+  const r = mk('g', { stroke: '#e8d5b0', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none' }, g);
+  for (const dx of [-70, -34, 0, 34, 70]) mk('path', { d: `M${x} ${y} C${x + dx * 0.3 * spread} ${y + 40} ${x + dx * spread} ${y + 60} ${x + dx * spread * 1.1} ${y + 120}` }, r);
+  return r;
+};
+const drop = (g, x, y, s = 1, fill = BLUE) => mk('path', { d: `M${x} ${y - 22 * s} C${x + 16 * s} ${y - 2 * s} ${x + 14 * s} ${y + 14 * s} ${x} ${y + 14 * s} C${x - 14 * s} ${y + 14 * s} ${x - 16 * s} ${y - 2 * s} ${x} ${y - 22 * s}Z`, fill }, g);
+
+/* ---------- the six scenes: each returns { el, draw(lt) } where lt = seconds since the line started ---------- */
+function sceneHook() {
+  const el = document.createElement('div'); el.className = 'sc';
+  el.innerHTML = '<div class="ttl">Cùng một thùng nước,<br>tưới kiểu nào <span style="color:#7fdcff">tiết kiệm nhất?</span></div>';
+  const ttl = el.firstChild;
+  const svg = mk('svg', { viewBox: '0 0 1080 950' }, el);
+  const bucket = mk('g', {}, svg);
+  mk('path', { d: 'M430 230 L650 230 L620 520 Q540 560 460 520Z', fill: '#2c3a46', stroke: '#8fa4b5', 'stroke-width': 6 }, bucket);
+  const level = mk('path', { fill: BLUE, opacity: .9 }, bucket);
+  mk('path', { d: 'M410 230 Q540 160 670 230', stroke: '#8fa4b5', 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' }, bucket);
+  const L = mk('g', {}, svg), R = mk('g', {}, svg);
+  // left: sprinkler
+  const sp = mk('g', { transform: 'translate(250 760)' }, L);
+  mk('rect', { x: -150, y: -150, width: 300, height: 300, rx: 40, fill: 'rgba(255,255,255,.07)', stroke: 'rgba(255,255,255,.2)', 'stroke-width': 3 }, sp);
+  mk('rect', { x: -10, y: 20, width: 20, height: 90, fill: '#8fa4b5' }, sp);
+  mk('circle', { cx: 0, cy: 10, r: 24, fill: '#c3d1dc' }, sp);
+  const spray = mk('g', { fill: BLUE }, sp);
+  const sprayDots = [];
+  for (let i = 0; i < 14; i++) sprayDots.push(mk('circle', { r: 7 }, spray));
+  txt(sp, 0, 138, 'phun mưa', 34, '#c9d6df', 700);
+  // right: drip
+  const dp = mk('g', { transform: 'translate(830 760)' }, R);
+  mk('rect', { x: -150, y: -150, width: 300, height: 300, rx: 40, fill: 'rgba(255,255,255,.07)', stroke: 'rgba(255,255,255,.2)', 'stroke-width': 3 }, dp);
+  mk('rect', { x: -110, y: -92, width: 220, height: 16, rx: 8, fill: '#8fa4b5' }, dp);
+  mk('rect', { x: -8, y: -76, width: 16, height: 26, fill: '#c3d1dc' }, dp);
+  const dd = [drop(dp, 0, -20, 1.2), drop(dp, 0, 30, 1.2)];
+  mk('rect', { x: -110, y: 70, width: 220, height: 40, rx: 14, fill: SOIL }, dp);
+  txt(dp, 0, 138, 'nhỏ giọt', 34, '#c9d6df', 700);
+  const q = txt(svg, 540, 800, '?', 190, '#ffd166', 800);
+  return {
+    el, draw(lt) {
+      ttl.style.opacity = ap(lt, 0.1, 0.5); ttl.style.transform = `translateY(${(1 - ap(lt, 0.1, 0.5)) * 30}px)`;
+      const w = 500 - 330 * (0.5 + 0.5 * Math.sin(lt * 1.6)) * 0.35;
+      set(level, { d: `M446 ${w} L634 ${w} L620 520 Q540 560 460 520Z`, opacity: ap(lt, 0.4, 0.5) });
+      bucket.setAttribute('transform', `translate(0 ${(1 - back(lt, 0.2, 0.6)) * -80})`);
+      L.setAttribute('transform', `translate(${(1 - back(lt, 1.3, 0.6)) * -300} 0)`);
+      R.setAttribute('transform', `translate(${(1 - back(lt, 1.6, 0.6)) * 300} 0)`);
+      sprayDots.forEach((c, i) => { const a = -2.6 + i * 0.28, ph = (lt * 0.9 + i * 0.13) % 1, r = 20 + ph * 120; set(c, { cx: Math.cos(a) * r, cy: 10 + Math.sin(a) * r * 0.9 + ph * ph * 120, opacity: (1 - ph) * ap(lt, 1.8, 0.4) }); });
+      dd.forEach((d, i) => { const ph = (lt * 0.8 + i * 0.5) % 1; d.setAttribute('transform', `translate(0 ${ph * 110 - 10})`); d.setAttribute('opacity', (ph < 0.85 ? 1 : (1 - ph) / 0.15) * ap(lt, 2, 0.4)); });
+      set(q, { opacity: ap(lt, 2.4, 0.4), transform: `translate(0 ${Math.sin(lt * 3) * 6}) rotate(${Math.sin(lt * 2) * 4} 540 740)` });
+    },
+  };
+}
+
+function scenePain() {
+  const el = document.createElement('div'); el.className = 'sc';
+  el.innerHTML = '<div class="ttl">Tưới tràn, phun mưa:<br>nước <span style="color:#ff8a7a">đi mất một phần lớn</span></div>';
+  const ttl = el.firstChild;
+  const svg = mk('svg', { viewBox: '0 0 1080 950' }, el);
+  soilBlock(svg, 60, 560, 960, 330);
+  plant(svg, 540, 560, 1.3);
+  roots(svg, 540, 590, 1.2);
+  const zone = mk('ellipse', { cx: 540, cy: 690, rx: 130, ry: 100, fill: 'none', stroke: GREEN, 'stroke-width': 5, 'stroke-dasharray': '14 12' }, svg);
+  const zl = txt(svg, 540, 860, 'rễ chỉ cần chỗ này', 34, '#bff0a8', 700);
+  // sprinkler head + spray
+  mk('rect', { x: 150, y: 330, width: 18, height: 230, fill: '#8fa4b5' }, svg);
+  mk('circle', { cx: 159, cy: 326, r: 28, fill: '#c3d1dc' }, svg);
+  const spray = mk('g', { fill: BLUE }, svg), dots = [];
+  for (let i = 0; i < 26; i++) dots.push(mk('circle', { r: 8 }, spray));
+  // evaporation
+  const evap = mk('g', { fill: 'none', stroke: '#ff9b8e', 'stroke-width': 7, 'stroke-linecap': 'round' }, svg), waves = [];
+  for (let i = 0; i < 4; i++) waves.push(mk('path', {}, evap));
+  const evl = txt(svg, 760, 330, 'bốc hơi', 36, '#ffb3a8', 700);
+  // runoff
+  const run = mk('path', { fill: BLUE, opacity: .85 }, svg);
+  const rl = txt(svg, 250, 548, 'chảy đi', 34, '#9fdcff', 700, 'start');
+  void rl;
+  return {
+    el, draw(lt) {
+      ttl.style.opacity = ap(lt, 0, 0.5); ttl.style.transform = `translateY(${(1 - ap(lt, 0, 0.5)) * 30}px)`;
+      dots.forEach((c, i) => { const a = -0.75 + (i % 13) * 0.07 + (i > 12 ? 0.04 : 0), v = 1.5 + (i % 5) * 0.2, ph = (lt * 0.55 + i * 0.071) % 1, tt = ph * v;
+        set(c, { cx: 159 + Math.cos(a) * 520 * tt, cy: 326 - Math.sin(a) * 520 * tt + 700 * tt * tt * 0.9, opacity: (tt < 0.01 || 326 - Math.sin(a) * 520 * tt + 700 * tt * tt * 0.9 > 552) ? 0 : ap(lt, 0.4, 0.4) }); });
+      waves.forEach((w, i) => { const x0 = 560 + i * 120, ph = (lt * 0.45 + i * 0.25) % 1, y0 = 520 - ph * 190;
+        set(w, { d: `M${x0} ${y0} q 16 -26 0 -52 q -16 -26 0 -52`, opacity: Math.sin(ph * Math.PI) * ap(lt, 2.5, 0.6) }); });
+      set(evl, { opacity: ap(lt, 2.8, 0.5) });
+      const rw = 330 * ap(lt, 5.5, 3);
+      set(run, { d: `M62 560 L${62 + rw} 560 Q${62 + rw + 40} 575 ${62 + rw} 590 L62 590Z`, opacity: ap(lt, 5.5, 0.5) * 0.85 });
+      set(zone, { opacity: ap(lt, 7.2, 0.5), 'stroke-dashoffset': -lt * 20 }); set(zl, { opacity: ap(lt, 7.4, 0.5) });
+    },
+  };
+}
+
+function sceneDrip() {
+  const el = document.createElement('div'); el.className = 'sc';
+  el.innerHTML = '<div class="ttl">Nhỏ giọt: nước rơi<br><span style="color:#7fdcff">ngay tại gốc</span></div>';
+  const ttl = el.firstChild;
+  const svg = mk('svg', { viewBox: '0 0 1080 950' }, el);
+  soilBlock(svg, 60, 560, 960, 330);
+  const bulb = mk('ellipse', { cx: 540, cy: 690, rx: 10, ry: 8, fill: BLUE, opacity: .35 }, svg);
+  plant(svg, 540, 560, 1.3);
+  roots(svg, 540, 590, 1.2);
+  mk('rect', { x: 120, y: 330, width: 840, height: 20, rx: 10, fill: '#8fa4b5' }, svg);
+  mk('rect', { x: 530, y: 350, width: 20, height: 34, fill: '#c3d1dc' }, svg);
+  const ds = [0, 1, 2].map(() => drop(svg, 540, 0, 1.25));
+  const lab = txt(svg, 540, 880, 'giữ ẩm ở vùng rễ', 36, '#bfe9ff', 700);
+  return {
+    el, draw(lt) {
+      ttl.style.opacity = ap(lt, 0, 0.5); ttl.style.transform = `translateY(${(1 - ap(lt, 0, 0.5)) * 30}px)`;
+      ds.forEach((d, i) => { const ph = (lt * 0.9 + i / 3) % 1, y = 400 + ph * ph * 230; d.setAttribute('transform', `translate(0 ${y})`); d.setAttribute('opacity', ph < 0.92 ? 1 : 0); });
+      const g = ap(lt, 1.2, 5.2);
+      set(bulb, { rx: 12 + g * 170, ry: 10 + g * 120, opacity: 0.25 + g * 0.35 });
+      set(lab, { opacity: ap(lt, 4.2, 0.6) });
+    },
+  };
+}
+
+function sceneFlow() {
+  const el = document.createElement('div'); el.className = 'sc';
+  el.innerHTML = '<div class="ttl">Cách làm: <span style="color:#7fdcff">3 bước</span></div>';
+  const ttl = el.firstChild;
+  const svg = mk('svg', { viewBox: '0 0 1080 950' }, el);
+  const items = [['1', 'Bể nước'], ['2', 'Bơm + ống dẫn'], ['3', 'Đầu nhỏ giọt sát gốc']];
+  const cards = items.map(([n, label], i) => {
+    const g = mk('g', {}, svg), y = 40 + i * 290;
+    mk('rect', { x: 120, y, width: 840, height: 200, rx: 36, fill: 'rgba(255,255,255,.08)', stroke: 'rgba(127,220,255,.45)', 'stroke-width': 3 }, g);
+    mk('circle', { cx: 220, cy: y + 100, r: 52, fill: BLUE }, g); txt(g, 220, y + 120, n, 62, '#06232f', 800);
+    txt(g, 310, y + 118, label, 54, '#fff', 800, 'start');
+    return g;
+  });
+  const arrows = [0, 1].map((i) => { const y = 250 + i * 290; return mk('path', { d: `M540 ${y} l0 60 m-22 -24 l22 24 l22 -24`, stroke: '#7fdcff', 'stroke-width': 9, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg); });
+  const flow = [0, 1].map((i) => mk('circle', { r: 11, fill: '#fff' }, svg));
+  return {
+    el, draw(lt) {
+      ttl.style.opacity = ap(lt, 0, 0.5); ttl.style.transform = `translateY(${(1 - ap(lt, 0, 0.5)) * 30}px)`;
+      cards.forEach((c, i) => { const a = [0.8, 2.6, 5.2][i], p = back(lt, a, 0.6); c.setAttribute('transform', `translate(${(1 - p) * 200} 0)`); c.setAttribute('opacity', ap(lt, a, 0.4)); });
+      arrows.forEach((a, i) => set(a, { opacity: ap(lt, [1.8, 4.2][i], 0.4) }));
+      flow.forEach((f, i) => { const ph = (lt * 0.9 + i * 0.4) % 1; set(f, { cx: 540, cy: 250 + i * 290 + ph * 60, opacity: ap(lt, [2, 4.4][i], 0.3) * Math.sin(ph * Math.PI) }); });
+    },
+  };
+}
+
+function sceneBenefits() {
+  const el = document.createElement('div'); el.className = 'sc';
+  el.innerHTML = '<div class="ttl">Nhờ vậy, <span style="color:#9be37a">ba lợi ích</span></div>';
+  const ttl = el.firstChild;
+  const svg = mk('svg', { viewBox: '0 0 1080 950' }, el);
+  const defs = [
+    ['Ít bốc hơi', (g) => { mk('circle', { cx: 0, cy: 0, r: 34, fill: SUN }, g); for (let a = 0; a < 8; a++) mk('path', { d: `M${Math.cos(a * 0.785) * 48} ${Math.sin(a * 0.785) * 48} L${Math.cos(a * 0.785) * 66} ${Math.sin(a * 0.785) * 66}`, stroke: SUN, 'stroke-width': 8, 'stroke-linecap': 'round' }, g); }],
+    ['Nước đến đúng gốc', (g) => { for (const r of [62, 40, 18]) mk('circle', { cx: 0, cy: 0, r, fill: 'none', stroke: BLUE, 'stroke-width': 9 }, g); mk('circle', { cx: 0, cy: 0, r: 8, fill: BLUE }, g); }],
+    ['Cỏ dại mọc ít hơn', (g) => { mk('path', { d: 'M-30 40 C-30 0 -20 -30 -34 -56 M0 40 C0 0 6 -40 0 -66 M30 40 C30 0 24 -30 38 -56', stroke: GREEN, 'stroke-width': 11, fill: 'none', 'stroke-linecap': 'round' }, g); mk('path', { d: 'M-62 -62 L62 62', stroke: RED, 'stroke-width': 11, 'stroke-linecap': 'round' }, g); }],
+  ];
+  const cards = defs.map(([label, icon], i) => {
+    const g = mk('g', {}, svg), y = 30 + i * 300;
+    mk('rect', { x: 100, y, width: 880, height: 240, rx: 40, fill: 'rgba(255,255,255,.08)', stroke: 'rgba(155,227,122,.45)', 'stroke-width': 3 }, g);
+    icon(mk('g', { transform: `translate(250 ${y + 120})` }, g));
+    txt(g, 380, y + 138, label, 54, '#fff', 800, 'start');
+    return g;
+  });
+  return {
+    el, draw(lt) {
+      ttl.style.opacity = ap(lt, 0, 0.5); ttl.style.transform = `translateY(${(1 - ap(lt, 0, 0.5)) * 30}px)`;
+      cards.forEach((c, i) => { const a = [1.0, 3.6, 6.4][i], p = back(lt, a, 0.6); c.setAttribute('transform', `translate(0 ${(1 - p) * 90}) `); c.setAttribute('opacity', ap(lt, a, 0.4)); });
+    },
+  };
+}
+
+function sceneOutro() {
+  const el = document.createElement('div'); el.className = 'sc';
+  el.innerHTML = '<div class="ttl">Thêm cảm biến độ ẩm,<br>vườn <span style="color:#7fdcff">tự tưới vừa đủ</span></div>';
+  const ttl = el.firstChild;
+  const svg = mk('svg', { viewBox: '0 0 1080 950' }, el);
+  soilBlock(svg, 160, 640, 760, 250);
+  plant(svg, 540, 640, 1.2);
+  const probe = mk('g', {}, svg);
+  mk('rect', { x: 330, y: 470, width: 50, height: 90, rx: 12, fill: '#c3d1dc' }, probe);
+  mk('rect', { x: 342, y: 560, width: 8, height: 150, fill: '#e8eef2' }, probe); mk('rect', { x: 360, y: 560, width: 8, height: 150, fill: '#e8eef2' }, probe);
+  const led = mk('circle', { cx: 355, cy: 500, r: 9, fill: '#9be37a' }, probe);
+  const rings = [0, 1, 2].map(() => mk('circle', { cx: 355, cy: 500, r: 20, fill: 'none', stroke: '#9be37a', 'stroke-width': 5 }, svg));
+  mk('rect', { x: 620, y: 360, width: 240, height: 18, rx: 9, fill: '#8fa4b5' }, svg);
+  const ds = [0, 1].map(() => drop(svg, 740, 0, 1.2));
+  const end = mk('g', {}, svg);
+  txt(end, 540, 120, 'Mỗi ngày biết thêm một chút,', 52, '#fff', 800);
+  const e2 = txt(end, 540, 190, 'vườn lại tiết kiệm thêm một chút.', 52, '#9be37a', 800);
+  void e2;
+  return {
+    el, draw(lt) {
+      ttl.style.opacity = ap(lt, 0, 0.5); ttl.style.transform = `translateY(${(1 - ap(lt, 0, 0.5)) * 30}px)`;
+      probe.setAttribute('transform', `translate(0 ${(1 - back(lt, 0.8, 0.7)) * -140})`);
+      rings.forEach((r, i) => { const ph = (lt * 0.7 + i / 3) % 1; set(r, { r: 18 + ph * 90, opacity: (1 - ph) * ap(lt, 1.8, 0.5) * 0.9 }); });
+      set(led, { fill: Math.sin(lt * 5) > 0 ? '#9be37a' : '#4a7a3a' });
+      ds.forEach((d, i) => { const ph = (lt * 0.9 + i * 0.5) % 1; d.setAttribute('transform', `translate(0 ${400 + ph * ph * 220})`); d.setAttribute('opacity', ph < 0.9 ? ap(lt, 3, 0.4) : 0); });
+      end.setAttribute('opacity', ap(lt, 4.6, 0.7)); end.setAttribute('transform', `translate(0 ${(1 - ap(lt, 4.6, 0.7)) * 30})`);
+    },
+  };
+}
+
+const SCENES = [sceneHook(), scenePain(), sceneDrip(), sceneFlow(), sceneBenefits(), sceneOutro()];
+const host = document.getElementById('scenes');
+SCENES.forEach((s) => { s.el.style.opacity = 0; host.appendChild(s.el); });
+const START = SCENES.map((_, i) => (i === 0 ? 0 : S[i] - 0.25));
+const END = SCENES.map((_, i) => (i === SCENES.length - 1 ? DUR : S[i + 1] + 0.15));
+
+/* ---------- captions from word timings: pages of ≤5 words, broken at punctuation ---------- */
+const PAGES = [];
+LINES.forEach((id, li) => {
+  const ws = (WORDS[id] || []).map(([w, a, b]) => ({ w, a: S[li] + a, b: S[li] + b }));
+  let cur = [];
+  const flush = () => { if (cur.length) { PAGES.push(cur); cur = []; } };
+  ws.forEach((x) => { cur.push(x); if (cur.length >= 5 || /[,.?!:;]$/.test(x.w)) flush(); });
+  flush();
+});
+const cap = document.getElementById('cap'), tick = document.querySelector('#tick i');
+let capKey = -1;
+function frame(t) {
+  SCENES.forEach((s, i) => {
+    const inA = clamp((t - START[i]) / 0.35), outA = i === SCENES.length - 1 ? 1 : clamp((END[i] - t) / 0.35);
+    const vis = t >= START[i] - 0.001 && t <= END[i] + 0.001;
+    s.el.style.display = vis ? 'block' : 'none';
+    if (!vis) return;
+    s.el.style.opacity = String(ease(inA) * ease(outA));
+    s.draw(Math.max(0, t - S[i]));
+  });
+  let pi = -1; PAGES.forEach((p, i) => { if (t >= p[0].a - 0.05) pi = i; });
+  const showing = pi >= 0 && t < PAGES[pi][PAGES[pi].length - 1].b + 0.6 ? pi : -1;
+  if (showing !== capKey) { capKey = showing; cap.innerHTML = showing < 0 ? '' : PAGES[showing].map((x, i) => `<span data-i="${i}">${x.w}</span>`).join(' '); }
+  if (showing >= 0) PAGES[showing].forEach((x, i) => { const e = cap.children[i]; e.className = t >= x.b ? 'done' : t >= x.a ? 'on' : ''; });
+  tick.style.width = (clamp(t / DUR) * 100).toFixed(2) + '%';
+}
+const B = VP.clock(80);
+VP.boot({ seek: frame, dur: DUR, cues: () => [], fonts: ['800 60px "Be Vietnam Pro"', '700 50px "Be Vietnam Pro"', '500 30px "Be Vietnam Pro"'] });
+window.SIZE = [W, H]; window.BPM = 80; window.B = B;
+window.AUDIT = { beats: [3.5, 8, 18, 26, 35, 43, 48], safe: [60, 220, 970, 1540], minFont: 26 };
+</script></body></html>
