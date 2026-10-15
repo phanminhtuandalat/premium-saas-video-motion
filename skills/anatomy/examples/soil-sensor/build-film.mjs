@@ -72,10 +72,10 @@ const table = [];
 const stateAt = (t) => table[clamp(Math.round(t / STEP), 0, table.length - 1)];
 
 const CAPS = [
-  [0.4, "Đầu dò cắm xuống đất, <b>đo độ ẩm</b> liên tục."],
-  [4.0, "Đất khô dần, con trượt <b>tụt xuống</b> ngưỡng."],
+  [0.5, "Đầu dò cắm xuống đất, <b>đo độ ẩm</b> liên tục."],
+  [4.2, "Đất khô dần, con trượt <b>tụt xuống</b> ngưỡng."],
   [8.0, "Chạm ngưỡng, <b>máy bơm tự bật</b>, nước nhỏ giọt."],
-  [12.6, "Muốn đất ẩm hơn? Xoay núm, <b>nâng ngưỡng</b>."],
+  [12.8, "Muốn đất ẩm hơn? Xoay núm, <b>nâng ngưỡng</b>."],
   [17.6, "Cây đủ nước, <b>anh không cần ra vườn</b>."],
 ];
 const cap = document.getElementById("cap"), gauge = document.getElementById("gauge"), fig = document.getElementById("fig");
