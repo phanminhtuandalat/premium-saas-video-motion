@@ -1,0 +1,74 @@
+[
+ {
+  "id": "c1",
+  "cueStart": 0,
+  "cueLen": 6.5,
+  "rawLen": 8.64,
+  "tempo": 1.35,
+  "finalLen": 6.37,
+  "fits": true
+ },
+ {
+  "id": "c2",
+  "cueStart": 6.5,
+  "cueLen": 8.5,
+  "rawLen": 10.64,
+  "tempo": 1.31,
+  "finalLen": 8.16,
+  "fits": true
+ },
+ {
+  "id": "c3",
+  "cueStart": 15,
+  "cueLen": 8.5,
+  "rawLen": 9.28,
+  "tempo": 1.14,
+  "finalLen": 8.16,
+  "fits": true
+ },
+ {
+  "id": "c4",
+  "cueStart": 23.5,
+  "cueLen": 6.5,
+  "rawLen": 5.36,
+  "tempo": 1.1,
+  "finalLen": 4.84,
+  "fits": true
+ },
+ {
+  "id": "c5",
+  "cueStart": 30,
+  "cueLen": 8,
+  "rawLen": 7.44,
+  "tempo": 1.1,
+  "finalLen": 6.77,
+  "fits": true
+ },
+ {
+  "id": "c6",
+  "cueStart": 38,
+  "cueLen": 8.5,
+  "rawLen": 10.4,
+  "tempo": 1.28,
+  "finalLen": 8.14,
+  "fits": true
+ },
+ {
+  "id": "c7",
+  "cueStart": 46.5,
+  "cueLen": 7.5,
+  "rawLen": 10.08,
+  "tempo": 1.35,
+  "finalLen": 7.45,
+  "fits": true
+ },
+ {
+  "id": "c8",
+  "cueStart": 54,
+  "cueLen": 6,
+  "rawLen": 9.76,
+  "tempo": 1.35,
+  "finalLen": 7.25,
+  "fits": false
+ }
+]
