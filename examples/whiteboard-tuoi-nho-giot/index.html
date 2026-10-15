@@ -1,0 +1,114 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Tưới nhỏ giọt — whiteboard 9:16</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700;800&family=Patrick+Hand&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<script src="../../engine/whiteboard.js"></script>
+<script src="../tuoi-nho-giot/words.js"></script>
+<!--
+  Kiểu bảng trắng (học từ skill srt-whiteboard-animation): giấy be, bút vẽ nét trước (ink) rồi màu hiện sau (color).
+  Làm bằng vector và là hàm thuần của t (engine/whiteboard.js), không cần ảnh AI hay OpenCV.
+  Giọng và thời điểm từ dùng lại của examples/tuoi-nho-giot (câu s2 và s3).
+-->
+<style>
+html,body{margin:0;background:#f5ebd7}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#f5ebd7;font-family:"Be Vietnam Pro",sans-serif;color:#2c2c2c}
+#stage:before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 40%,rgba(255,255,255,.35),rgba(120,90,40,.10));pointer-events:none}
+svg#board{position:absolute;left:0;top:330px;width:1080px;height:950px;overflow:visible}
+.ttl{position:absolute;left:60px;width:960px;top:256px;font-size:58px;font-weight:800;line-height:1.12}
+#brand{position:absolute;left:60px;top:224px;font-size:30px;font-weight:700;letter-spacing:.2em;color:#e0533d}
+#cap{position:absolute;left:60px;width:960px;top:1327px;font-size:56px;font-weight:700;line-height:1.28;text-align:center}
+#cap span{color:#4a4a4a}#cap span.on{color:#e0533d}#cap span.done{color:#1f1f1f}
+.hand{font-family:"Patrick Hand","Be Vietnam Pro",sans-serif}
+</style></head>
+<body>
+<div id="stage">
+ <div id="brand">CHI'S FARM · MỖI NGÀY MỘT CHÚT</div>
+ <div class="ttl" id="tA">Phun mưa: <span style="color:#e0533d">nước đi mất</span></div>
+ <div class="ttl" id="tB" style="opacity:0">Nhỏ giọt: <span style="color:#2f7fd1">nước ở lại gốc</span></div>
+ <svg id="board" viewBox="0 0 1080 950"><g id="gA"></g><g id="gB"></g></svg>
+ <div id="cap"></div>
+</div>
+<script>
+const W = 1080, H = 1920, DUR = 19;
+const { clamp, ease } = VP;
+const INK = '#3b3b3b', RED = '#e0533d', ORANGE = '#f08a24', BLUE = '#2f7fd1', GREEN = '#9cc47a', GREY = '#cfd6dc';
+const LINES = [['s2', 0.5], ['s3', 10.22]];
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const line = (g, d, color = INK, w = 7) => mk('path', { d, fill: 'none', stroke: color, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+const shape = (g, d, fill, color = INK, w = 7) => mk('path', { d, fill, stroke: color, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+const label = (g, x, y, s, color, size = 52) => { const t = mk('text', { x, y, 'font-size': size, fill: color, 'text-anchor': 'middle', class: 'hand', 'paint-order': 'stroke', stroke: '#f5ebd7', 'stroke-width': 10 }, g); t.textContent = s; return t; };
+const gA = document.getElementById('gA'), gB = document.getElementById('gB'), board = document.getElementById('board');
+
+/* shared plant + roots; scene A and B draw their own copies */
+function plant(g, items, a) {
+  items.push({ el: line(g, 'M540 600 C534 540 548 490 540 440'), a, d: 0.5 });
+  items.push({ el: shape(g, 'M540 520 C480 520 440 480 448 430 C500 440 536 470 540 520Z', GREEN), a: a + 0.4, d: 0.5, fill: GREEN });
+  items.push({ el: shape(g, 'M540 490 C600 490 640 450 632 400 C580 410 544 440 540 490Z', GREEN), a: a + 0.8, d: 0.5, fill: GREEN });
+  ['M540 600 C536 650 500 670 480 720', 'M540 600 C540 660 540 690 540 740', 'M540 600 C546 650 580 670 604 720', 'M540 600 C520 640 470 650 450 690', 'M540 600 C560 640 610 650 630 690']
+    .forEach((d, i) => items.push({ el: line(g, d, '#8a7350', 6), a: a + 1.3 + i * 0.22, d: 0.35 }));
+}
+function ground(g, items, a) {
+  items.push({ el: line(g, 'M60 600 C300 590 700 612 1020 600', INK, 8), a, d: 0.7 });
+  ['M120 650 l34 22', 'M250 700 l34 22', 'M390 660 l34 22', 'M700 740 l34 22', 'M830 680 l34 22', 'M940 740 l34 22', 'M170 780 l34 22', 'M880 810 l34 22']
+    .forEach((d, i) => items.push({ el: line(g, d, '#a89a7a', 5), a: a + 0.5 + i * 0.07, d: 0.2 }));
+}
+
+/* ---- scene A: sprinkler wastes water ---- */
+const itemsA = [];
+ground(gA, itemsA, 0.5);
+plant(gA, itemsA, 1.0);
+itemsA.push({ el: line(gA, 'M200 600 L200 366', INK, 9), a: 2.3, d: 0.45 });
+itemsA.push({ el: mk('circle', { cx: 200, cy: 340, r: 26, stroke: INK, 'stroke-width': 7 }, gA), a: 2.7, d: 0.4, fill: GREY });
+['M226 336 C330 230 420 300 430 598', 'M226 336 C380 200 560 280 640 598', 'M226 336 C420 180 700 260 860 598']
+  .forEach((d, i) => itemsA.push({ el: line(gA, d, BLUE, 7), a: 3.0 + i * 0.4, d: 0.7 }));
+[700, 800, 900].forEach((x, i) => itemsA.push({ el: line(gA, `M${x} 560 q 22 -30 0 -60 q -22 -30 0 -60`, RED, 7), a: 4.3 + i * 0.35, d: 0.6 }));
+itemsA.push({ el: label(gA, 800, 410, 'bốc hơi', RED), a: 5.5, d: 0.4, type: 'text' });
+itemsA.push({ el: line(gA, 'M420 608 C520 624 640 630 760 642 C860 652 940 662 1010 700', BLUE, 8), a: 5.9, d: 1.0 });
+itemsA.push({ el: label(gA, 740, 700, 'chảy đi', BLUE), a: 6.7, d: 0.4, type: 'text' });
+itemsA.push({ el: mk('path', { d: 'M410 700 a130 100 0 1 0 260 0 a130 100 0 1 0 -260 0', fill: 'none', stroke: ORANGE, 'stroke-width': 8, 'stroke-linecap': 'round' }, gA), a: 7.4, d: 1.2 });
+itemsA.push({ el: label(gA, 540, 860, 'rễ chỉ cần chỗ này', ORANGE, 56), a: 8.7, d: 0.5, type: 'text' });
+
+/* ---- scene B: drip ---- */
+const itemsB = [];
+const bulb = mk('path', { d: 'M380 690 a160 120 0 1 0 320 0 a160 120 0 1 0 -320 0', stroke: BLUE, 'stroke-width': 8, 'stroke-linecap': 'round' }, gB);
+itemsB.push({ el: bulb, a: 14.0, d: 2.2, fill: '#bfe0ff' });
+ground(gB, itemsB, 10.3);
+plant(gB, itemsB, 10.8);
+itemsB.push({ el: line(gB, 'M120 330 L960 330', INK, 10), a: 11.9, d: 0.6 });
+itemsB.push({ el: shape(gB, 'M528 332 L528 366 L552 366 L552 332', GREY), a: 12.4, d: 0.35, fill: GREY });
+itemsB.push({ el: label(gB, 540, 300, 'ngay tại gốc', BLUE, 56), a: 13.2, d: 0.5, type: 'text' });
+itemsB.push({ el: label(gB, 540, 880, 'giữ ẩm ở vùng rễ', BLUE, 56), a: 16.2, d: 0.5, type: 'text' });
+const dropEls = [0, 1, 2].map(() => mk('path', { d: 'M0 -22 C16 -2 14 14 0 14 C-14 14 -16 -2 0 -22Z', fill: BLUE }, gB));
+
+const seqA = WB.sequence(itemsA), seqB = WB.sequence(itemsB);
+const pen = WB.pen(board, { size: 1.0 });
+
+/* captions: pages of ≤5 words from words.js */
+const PAGES = [];
+LINES.forEach(([id, st]) => {
+  const ws = (window.WORDS[id] || []).map(([w, a, b]) => ({ w, a: st + a, b: st + b }));
+  let cur = []; const flush = () => { if (cur.length) { PAGES.push(cur); cur = []; } };
+  ws.forEach((x) => { cur.push(x); if (cur.length >= 5 || /[,.?!:;]$/.test(x.w)) flush(); }); flush();
+});
+const cap = document.getElementById('cap'), tA = document.getElementById('tA'), tB = document.getElementById('tB');
+let capKey = -1;
+function frame(t) {
+  const aOut = 1 - ease(clamp((t - 9.75) / 0.45)), bIn = ease(clamp((t - 10.1) / 0.4));
+  gA.setAttribute('opacity', aOut); gB.setAttribute('opacity', bIn);
+  tA.style.opacity = ease(clamp((t - 0.2) / 0.4)) * aOut; tB.style.opacity = bIn;
+  const tipA = seqA.draw(t), tipB = seqB.draw(t);
+  const tip = t < 10 ? tipA : tipB;
+  if (tip) { pen.setAttribute('transform', `translate(${tip.x.toFixed(1)} ${tip.y.toFixed(1)})`); pen.setAttribute('opacity', 1); } else pen.setAttribute('opacity', 0);
+  dropEls.forEach((d, i) => { const ph = ((t - 12.6) * 0.9 + i / 3) % 1; const y = 390 + ph * ph * 200; d.setAttribute('transform', `translate(540 ${y.toFixed(1)})`); d.setAttribute('opacity', t > 12.6 && t < 17.6 && ph < 0.92 ? 1 : 0); });
+  let pi = -1; PAGES.forEach((p, i) => { if (t >= p[0].a - 0.05) pi = i; });
+  const showing = pi >= 0 && t < PAGES[pi][PAGES[pi].length - 1].b + 0.6 ? pi : -1;
+  if (showing !== capKey) { capKey = showing; cap.innerHTML = showing < 0 ? '' : PAGES[showing].map((x) => `<span>${x.w}</span>`).join(' '); }
+  if (showing >= 0) PAGES[showing].forEach((x, i) => { cap.children[i].className = t >= x.b ? 'done' : t >= x.a ? 'on' : ''; });
+}
+const B = VP.clock(80);
+VP.boot({ seek: frame, dur: DUR, cues: () => [], fonts: ['800 58px "Be Vietnam Pro"', '700 56px "Be Vietnam Pro"', '400 52px "Patrick Hand"'] });
+window.SIZE = [W, H]; window.BPM = 80; window.B = B;
+window.AUDIT = { beats: [4, 8.5, 12, 16.5], safe: [60, 220, 970, 1540], minFont: 26 };
+</script></body></html>
