@@ -1,0 +1,107 @@
+{
+  "sceneId": "scene-01",
+  "canvas": {
+    "width": 768,
+    "height": 1376
+  },
+  "storyBasis": "Giai đoạn dựng khung tán: MIA Nutriflow 13-13-13 cân bằng Đạm-Lân-Kali, rễ bung, lá xanh, tưới nhỏ giọt.",
+  "sceneDurationMs": 30000,
+  "elements": [
+    {
+      "id": "scale-13",
+      "label": "Cân 13-13-13, can phân và giọt nước",
+      "sequence": 1,
+      "narrativeRole": "Giới thiệu công thức nền tảng",
+      "subtitle": "cây cần nền tảng cân bằng tuyệt đối từ MIA Nutriflow 13-13-13.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 110,
+        "width": 538,
+        "height": 344
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 3000,
+        "durationMs": 11500,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          120
+        ],
+        "end": [
+          633,
+          444
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "bush",
+      "label": "Bụi cây thân mập, lá vươn tán",
+      "sequence": 2,
+      "narrativeRole": "Kết quả: rễ bung, thân mập, lá xanh bóng",
+      "subtitle": "giúp rễ bung mạnh, thân mập, lá dày xanh bóng, tạo bộ khung vững chắc.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 482,
+        "width": 538,
+        "height": 413
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 15000,
+        "durationMs": 8000,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          492
+        ],
+        "end": [
+          633,
+          885
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "drip-roots",
+      "label": "Dây tưới nhỏ giọt và bộ rễ",
+      "sequence": 3,
+      "narrativeRole": "Nền tảng dưới đất, bước chạy đà",
+      "subtitle": "Đây chính là bước chạy đà hoàn hảo trước khi cây bước vào giai đoạn mang trái.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 936,
+        "width": 538,
+        "height": 344
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 23500,
+        "durationMs": 5500,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          946
+        ],
+        "end": [
+          633,
+          1270
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

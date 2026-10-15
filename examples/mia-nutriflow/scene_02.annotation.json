@@ -1,0 +1,107 @@
+{
+  "sceneId": "scene-02",
+  "canvas": {
+    "width": 768,
+    "height": 1376
+  },
+  "storyBasis": "Giai đoạn nuôi trái: MIA Nutriflow 7-5-44, Kali 44% thúc đường và tinh bột về trái, trái lớn, nặng ký.",
+  "sceneDurationMs": 30000,
+  "elements": [
+    {
+      "id": "badge-744",
+      "label": "Huy hiệu 7-5-44, mũi tên cam ở số 44",
+      "sequence": 1,
+      "narrativeRole": "Chuyển công thức sang giai đoạn nuôi trái",
+      "subtitle": "chuyển ngay sang MIA Nutriflow 7-5-44 với hàm lượng Kali cao vượt trội lên tới 44%.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 110,
+        "width": 538,
+        "height": 303
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 6000,
+        "durationMs": 9500,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          120
+        ],
+        "end": [
+          633,
+          403
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "fruit-cluster",
+      "label": "Chùm quả và mũi tên dẫn dinh dưỡng",
+      "sequence": 2,
+      "narrativeRole": "Cơ chế: Kali dồn đường và tinh bột về trái",
+      "subtitle": "Kali cao thúc đẩy vận chuyển đường và tinh bột về trái, giúp trái lớn nhanh.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 454,
+        "width": 538,
+        "height": 440
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 16500,
+        "durationMs": 7000,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          464
+        ],
+        "end": [
+          633,
+          884
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "basket-scale",
+      "label": "Giỏ trái trên cân, mũi tên tăng trưởng",
+      "sequence": 3,
+      "narrativeRole": "Kết quả: trái nặng ký, ngọt đậm, mùa vụ bội thu",
+      "subtitle": "13-13-13 dựng khung khỏe, 7-5-44 thúc trái chất lượng.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 936,
+        "width": 538,
+        "height": 358
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 24000,
+        "durationMs": 5000,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          946
+        ],
+        "end": [
+          633,
+          1284
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}
