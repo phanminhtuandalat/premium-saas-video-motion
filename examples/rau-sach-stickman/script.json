@@ -1,0 +1,298 @@
+{
+  "meta": {
+    "brand": "Chi's Farm",
+    "letters": "",
+    "cta": {
+      "kicker": "Chi's Farm",
+      "headline": "Mỗi ngày\n[một_chút]",
+      "rows": [
+        [
+          "Theo dõi kênh",
+          "Chi's Farm"
+        ]
+      ]
+    }
+  },
+  "bpm": 100,
+  "hold": 2.5,
+  "capMaxWords": 9,
+  "scenes": [
+    {
+      "type": "hook",
+      "min": 4.5,
+      "kicker": "Rau sạch",
+      "headline": "Ai cũng muốn\nnhưng [do_dự]?",
+      "wm": "?"
+    },
+    {
+      "type": "stat",
+      "min": 5,
+      "kicker": "TP.HCM, 2026",
+      "headline": "Sẵn_sàng [trả_thêm]",
+      "value": 86,
+      "unit": "%",
+      "label": "chịu trả thêm 5–10%",
+      "countAt": {
+        "line": 2,
+        "word": "86"
+      },
+      "wm": "86"
+    },
+    {
+      "type": "quiz",
+      "min": 6,
+      "kicker": "Niềm tin",
+      "headline": "Họ tin vào [điều_gì]?",
+      "sub": "71,2% chọn đáp án này",
+      "answer": {
+        "text": "Quy trình được bảo đảm",
+        "at": {
+          "line": 5,
+          "word": "quy"
+        }
+      }
+    },
+    {
+      "type": "list",
+      "min": 5,
+      "kicker": "Dấu hiệu tin cậy",
+      "headline": "Top [3_dấu_hiệu]",
+      "items": [
+        [
+          "1",
+          "Quy trình 71,2%"
+        ],
+        [
+          "2",
+          "VietGAP 49,4%"
+        ],
+        [
+          "3",
+          "Cửa hàng 48,7%"
+        ]
+      ],
+      "wm": "3"
+    },
+    {
+      "type": "point",
+      "min": 5,
+      "kicker": "Còn nhãn thì sao?",
+      "headline": "Nhãn [organic]",
+      "sub": "Khảo sát TP.HCM",
+      "prop": "check",
+      "pose": "point",
+      "chips": [
+        "Chỉ 29,5% chọn",
+        "Thấp hơn quy trình"
+      ]
+    },
+    {
+      "type": "point",
+      "min": 6,
+      "kicker": "Giá bán",
+      "headline": "Giá [cao_hơn]",
+      "sub": "Rau hữu cơ so với rau thường",
+      "prop": "chart",
+      "pose": "cheer",
+      "chips": [
+        "Thường +20–35%",
+        "Nguồn: HTV, Dân Việt"
+      ]
+    },
+    {
+      "type": "stat",
+      "min": 6,
+      "kicker": "Lâm Đồng, 2025",
+      "headline": "Hữu cơ [chứng_nhận]",
+      "value": 96,
+      "unit": " ha",
+      "label": "trên khoảng 93.800 ha rau",
+      "countAt": {
+        "line": 11,
+        "word": "96"
+      },
+      "wm": "96"
+    },
+    {
+      "type": "list",
+      "min": 6,
+      "kicker": "Chủ vườn",
+      "headline": "3 việc nên [làm]",
+      "items": [
+        [
+          "1",
+          "Công khai quy trình"
+        ],
+        [
+          "2",
+          "Làm VietGAP trước"
+        ],
+        [
+          "3",
+          "Thùng rau định kỳ"
+        ]
+      ],
+      "wm": "3"
+    },
+    {
+      "type": "cta",
+      "min": 5
+    }
+  ],
+  "lines": [
+    {
+      "scene": 0,
+      "sub": "Ai cũng muốn ăn rau sạch."
+    },
+    {
+      "scene": 0,
+      "sub": "Nhưng người mua vẫn còn do_dự?",
+      "pause": 0.7
+    },
+    {
+      "scene": 1,
+      "sub": "Ở TP.HCM, 86% người được hỏi",
+      "tts": [
+        [
+          "vi",
+          "Ở thành phố Hồ Chí Minh, tám mươi sáu phần trăm người được hỏi"
+        ]
+      ]
+    },
+    {
+      "scene": 1,
+      "sub": "sẵn_sàng trả thêm 5 đến 10%",
+      "tts": [
+        [
+          "vi",
+          "sẵn sàng trả thêm năm đến mười phần trăm"
+        ]
+      ]
+    },
+    {
+      "scene": 2,
+      "sub": "Vậy họ tin vào điều gì nhất?",
+      "pause": 0.7
+    },
+    {
+      "scene": 2,
+      "sub": "Quy_trình sản_xuất được bảo_đảm, 71,2% chọn",
+      "tts": [
+        [
+          "vi",
+          "Quy trình sản xuất được bảo đảm, bảy mươi mốt phẩy hai phần trăm chọn"
+        ]
+      ]
+    },
+    {
+      "scene": 3,
+      "sub": "Kế đến là VietGAP",
+      "tts": [
+        [
+          "vi",
+          "Kế đến là Việt Gáp"
+        ]
+      ]
+    },
+    {
+      "scene": 3,
+      "sub": "và cửa hàng rau sạch"
+    },
+    {
+      "scene": 4,
+      "sub": "Còn nhãn organic chỉ 29,5% chọn",
+      "tts": [
+        [
+          "vi",
+          "Còn nhãn ô-ga-níc chỉ hai mươi chín phẩy năm phần trăm chọn"
+        ]
+      ]
+    },
+    {
+      "scene": 5,
+      "sub": "Rau hữu_cơ thường cao hơn 20 đến 35%",
+      "tts": [
+        [
+          "vi",
+          "Rau hữu cơ thường cao hơn hai mươi đến ba mươi lăm phần trăm"
+        ]
+      ]
+    },
+    {
+      "scene": 5,
+      "sub": "vì người mua trả tiền cho bằng_chứng"
+    },
+    {
+      "scene": 6,
+      "sub": "Nhưng ở Lâm_Đồng, hữu cơ chứng_nhận chỉ 96 ha",
+      "tts": [
+        [
+          "vi",
+          "Nhưng ở Lâm Đồng, hữu cơ có chứng nhận chỉ chín mươi sáu héc-ta"
+        ]
+      ]
+    },
+    {
+      "scene": 6,
+      "sub": "trên khoảng 93.800 ha rau",
+      "tts": [
+        [
+          "vi",
+          "trên khoảng chín mươi ba nghìn tám trăm héc-ta rau"
+        ]
+      ]
+    },
+    {
+      "scene": 7,
+      "sub": "Vậy chủ vườn làm gì?",
+      "pause": 0.7
+    },
+    {
+      "scene": 7,
+      "sub": "Công_khai quy_trình, làm VietGAP, thử thùng rau định_kỳ",
+      "tts": [
+        [
+          "vi",
+          "Công khai quy trình, làm Việt Gáp, thử thùng rau định kỳ"
+        ]
+      ]
+    },
+    {
+      "scene": 8,
+      "sub": "Mỗi ngày biết thêm một chút,"
+    },
+    {
+      "scene": 8,
+      "sub": "vườn lại vững hơn một chút."
+    },
+    {
+      "scene": 8,
+      "sub": "Theo_dõi Chi's Farm nhé",
+      "tts": [
+        [
+          "vi",
+          "Theo dõi kênh Chi Farm nhé"
+        ]
+      ]
+    }
+  ],
+  "cues": [
+    {
+      "line": 2,
+      "word": "người",
+      "sfx": "ding"
+    },
+    {
+      "line": 5,
+      "word": "quy",
+      "sfx": "pop"
+    },
+    {
+      "line": 11,
+      "word": "chỉ",
+      "sfx": "ding"
+    }
+  ],
+  "voiceEngine": "vieneu",
+  "vieneuVoice": "Giọng Tuấn MIA"
+}

@@ -1,0 +1,9 @@
+node_modules/
+renders/*.mp4
+audio/stems/
+audio/mix.wav
+audio/bed.wav
+audio/voice/_cache/
+audio/music.wav
+audio/sfx*
+*.log

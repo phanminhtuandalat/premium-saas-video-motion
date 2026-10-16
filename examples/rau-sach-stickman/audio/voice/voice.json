@@ -1,0 +1,114 @@
+{
+ "engine": "vieneu",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "file": "audio/voice/line00.wav",
+   "dur": 1.504,
+   "spoken": "Ai cũng muốn ăn rau sạch."
+  },
+  {
+   "i": 1,
+   "file": "audio/voice/line01.wav",
+   "dur": 2.28,
+   "spoken": "Nhưng người mua vẫn còn do dự?"
+  },
+  {
+   "i": 2,
+   "file": "audio/voice/line02.wav",
+   "dur": 4.596,
+   "spoken": "Ở thành phố Hồ Chí Minh, tám mươi sáu phần trăm người được hỏi"
+  },
+  {
+   "i": 3,
+   "file": "audio/voice/line03.wav",
+   "dur": 3.373,
+   "spoken": "sẵn sàng trả thêm năm đến mười phần trăm"
+  },
+  {
+   "i": 4,
+   "file": "audio/voice/line04.wav",
+   "dur": 1.768,
+   "spoken": "Vậy họ tin vào điều gì nhất?"
+  },
+  {
+   "i": 5,
+   "file": "audio/voice/line05.wav",
+   "dur": 4.53,
+   "spoken": "Quy trình sản xuất được bảo đảm, bảy mươi mốt phẩy hai phần trăm chọn"
+  },
+  {
+   "i": 6,
+   "file": "audio/voice/line06.wav",
+   "dur": 1.937,
+   "spoken": "Kế đến là Việt Gáp"
+  },
+  {
+   "i": 7,
+   "file": "audio/voice/line07.wav",
+   "dur": 1.091,
+   "spoken": "và cửa hàng rau sạch"
+  },
+  {
+   "i": 8,
+   "file": "audio/voice/line08.wav",
+   "dur": 3.755,
+   "spoken": "Còn nhãn ô-ga-níc chỉ hai mươi chín phẩy năm phần trăm chọn"
+  },
+  {
+   "i": 9,
+   "file": "audio/voice/line09.wav",
+   "dur": 4.34,
+   "spoken": "Rau hữu cơ thường cao hơn hai mươi đến ba mươi lăm phần trăm"
+  },
+  {
+   "i": 10,
+   "file": "audio/voice/line10.wav",
+   "dur": 1.779,
+   "spoken": "vì người mua trả tiền cho bằng chứng"
+  },
+  {
+   "i": 11,
+   "file": "audio/voice/line11.wav",
+   "dur": 3.986,
+   "spoken": "Nhưng ở Lâm Đồng, hữu cơ có chứng nhận chỉ chín mươi sáu héc-ta"
+  },
+  {
+   "i": 12,
+   "file": "audio/voice/line12.wav",
+   "dur": 2.828,
+   "spoken": "trên khoảng chín mươi ba nghìn tám trăm héc-ta rau"
+  },
+  {
+   "i": 13,
+   "file": "audio/voice/line13.wav",
+   "dur": 1.29,
+   "spoken": "Vậy chủ vườn làm gì?"
+  },
+  {
+   "i": 14,
+   "file": "audio/voice/line14.wav",
+   "dur": 3.829,
+   "spoken": "Công khai quy trình, làm Việt Gáp, thử thùng rau định kỳ"
+  },
+  {
+   "i": 15,
+   "file": "audio/voice/line15.wav",
+   "dur": 1.347,
+   "spoken": "Mỗi ngày biết thêm một chút,"
+  },
+  {
+   "i": 16,
+   "file": "audio/voice/line16.wav",
+   "dur": 1.251,
+   "spoken": "vườn lại vững hơn một chút."
+  },
+  {
+   "i": 17,
+   "file": "audio/voice/line17.wav",
+   "dur": 1.42,
+   "spoken": "Theo dõi kênh Chi Farm nhé"
+  }
+ ]
+}
