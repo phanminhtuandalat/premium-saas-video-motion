@@ -5,7 +5,8 @@ motion does) and reports the loop seam. Run on every final render.
 """
 import subprocess, sys, argparse, numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('video'); ap.add_argument('--bpm', type=float, default=0); a = ap.parse_args()
-fps = eval(subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v', '-show_entries', 'stream=r_frame_rate', '-of', 'csv=p=0', a.video], capture_output=True, text=True).stdout.strip())
+_r = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v', '-show_entries', 'stream=r_frame_rate', '-of', 'csv=p=0', a.video], capture_output=True, text=True).stdout.strip().split()[0].split(',')[0]
+fps = eval(_r)
 w = 160
 raw = subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', a.video, '-vf', f'scale={w}:{w}', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'], capture_output=True).stdout
 f = np.frombuffer(raw, np.uint8).reshape(-1, w, w).astype(np.float32)

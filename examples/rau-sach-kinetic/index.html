@@ -1,0 +1,251 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Rau sạch: cầu tăng, niềm tin còn thiếu — số liệu chuyển động 9:16</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800;900&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<script src="timeline.js"></script>
+<script src="words.js"></script>
+<!--
+  Kiểu "số liệu chữ chuyển động, nền tối". Lời đọc dùng lại của examples/rau-sach-stickman (VieNeu).
+  Mốc cảnh (timeline.js) lấy từ độ dài từng câu; mốc từng từ (words.js) do Whisper căn trên chữ đọc ra.
+  DISP: mỗi chữ hiển thị kèm số từ đọc tương ứng (ví dụ "86%" đọc là 5 từ), để số đếm và cột khớp đúng lúc nói.
+  Số liệu: xem ../rau-sach-stickman/facts.md. Mọi khung hình là hàm thuần của t.
+-->
+<style>
+html,body{margin:0;background:#050b08}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Be Vietnam Pro",sans-serif;color:#F4F8F5;
+ background:radial-gradient(110% 55% at 50% 28%,#0f2018 0%,#050b08 70%)}
+.sc{position:absolute;inset:0}
+.k{position:absolute;left:60px;width:960px;font-size:34px;font-weight:800;letter-spacing:.16em;color:#7CF29A;text-transform:uppercase}
+.src{position:absolute;left:70px;width:880px;font-size:27px;font-weight:500;color:#7a8a80}
+.big{position:absolute;left:0;width:1080px;text-align:center;font-weight:900;line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.h{position:absolute;left:60px;width:960px;font-weight:800;line-height:1.08}
+.g{color:#7CF29A}.m{color:#8fa196}.o{color:#FFB547}
+#brand{position:absolute;left:60px;top:226px;font-size:28px;font-weight:800;letter-spacing:.22em;color:#7CF29A;z-index:30}
+#cap{position:absolute;left:60px;width:960px;top:1327px;font-size:54px;font-weight:800;line-height:1.25;text-align:center;z-index:30;text-shadow:0 2px 18px rgba(0,0,0,.9)}
+#cap span{color:#8fa196}#cap span.on{color:#7CF29A}#cap span.done{color:#F4F8F5}
+svg{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+.row{position:absolute;left:100px;width:850px}
+.lab{font-size:36px;font-weight:700}
+.val{position:absolute;right:0;top:0;font-size:44px;font-weight:900}
+.bar{position:absolute;left:0;top:52px;height:54px;border-radius:14px;width:0}
+.card{position:absolute;left:100px;width:880px;height:200px;border-radius:32px;background:rgba(124,242,154,.08);border:2px solid rgba(124,242,154,.35);display:flex;align-items:center;gap:34px;padding:0 44px;box-sizing:border-box}
+.card b{font-size:84px;font-weight:900;color:#7CF29A;width:70px}
+.card span{font-size:50px;font-weight:800;line-height:1.1}
+</style></head>
+<body>
+<div id="stage">
+ <div id="brand">CHI'S FARM</div>
+ <div id="scenes"></div>
+ <div id="cap"></div>
+</div>
+<script>
+const W = 1080, H = 1920, TL = window.TL, DUR = TL.dur, WORDS = window.WORDS;
+const { clamp, ease } = VP;
+const ap = (t, a, d = 0.5) => ease(clamp((t - a) / d));
+const back = (t, a, d = 0.5) => { const x = clamp((t - a) / d), c = 1.5; return x <= 0 ? 0 : x >= 1 ? 1 : 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const fmt = (n, dec = 0) => n.toLocaleString('vi-VN', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+/* display token -> number of spoken words it covers (spoken forms: see audio/vo/spoken.json) */
+const DISP = [
+ [["Ai",1],["cũng",1],["muốn",1],["ăn",1],["rau",1],["sạch.",1]],
+ [["Nhưng",1],["người",1],["mua",1],["vẫn",1],["còn",1],["do",1],["dự?",1]],
+ [["Ở",1],["TP.HCM,",5],["86%",5],["người",1],["được",1],["hỏi",1]],
+ [["sẵn",1],["sàng",1],["trả",1],["thêm",1],["5",1],["đến",1],["10%",3]],
+ [["Vậy",1],["họ",1],["tin",1],["vào",1],["điều",1],["gì",1],["nhất?",1]],
+ [["Quy",1],["trình",1],["sản",1],["xuất",1],["được",1],["bảo",1],["đảm,",1],["71,2%",7],["chọn",1]],
+ [["Kế",1],["đến",1],["là",1],["VietGAP",2]],
+ [["và",1],["cửa",1],["hàng",1],["rau",1],["sạch",1]],
+ [["Còn",1],["nhãn",1],["organic",1],["chỉ",1],["29,5%",7],["chọn",1]],
+ [["Rau",1],["hữu",1],["cơ",1],["thường",1],["cao",1],["hơn",1],["20",2],["đến",1],["35%",5]],
+ [["vì",1],["người",1],["mua",1],["trả",1],["tiền",1],["cho",1],["bằng",1],["chứng",1]],
+ [["Nhưng",1],["ở",1],["Lâm",1],["Đồng,",1],["hữu",1],["cơ",1],["có",1],["chứng",1],["nhận",1],["chỉ",1],["96",3],["ha",1]],
+ [["trên",1],["khoảng",1],["93.800",6],["ha",1],["rau",1]],
+ [["Vậy",1],["chủ",1],["vườn",1],["làm",1],["gì?",1]],
+ [["Công",1],["khai",1],["quy",1],["trình,",1],["làm",1],["VietGAP,",2],["thử",1],["thùng",1],["rau",1],["định",1],["kỳ",1]],
+ [["Mỗi",1],["ngày",1],["biết",1],["thêm",1],["một",1],["chút,",1]],
+ [["vườn",1],["lại",1],["vững",1],["hơn",1],["một",1],["chút.",1]],
+ [["Theo",1],["dõi",1],["kênh",1],["Chi's",1],["Farm",1],["nhé",1]],
+];
+/* absolute time of display token k of line i: start/end of its spoken words */
+const tok = (i, k) => {
+  const w = WORDS['l' + String(i).padStart(2, '0')] || [], base = TL.lines[i].start;
+  let s = 0; for (let q = 0; q < k; q++) s += DISP[i][q][1];
+  const e = s + DISP[i][k][1] - 1;
+  const a = w[s] ? w[s][1] : 0, b = w[e] ? w[e][2] : TL.lines[i].dur;
+  return { a: base + a, b: base + b };
+};
+const ta = (i, k) => tok(i, k).a, tb = (i, k) => tok(i, k).b;
+DISP.forEach((d, i) => { const n = d.reduce((x, y) => x + y[1], 0), sp = (WORDS['l' + String(i).padStart(2, '0')] || []).length; if (n !== sp) console.warn('line', i, 'display covers', n, 'spoken words, Whisper gave', sp); });
+
+const el = (html, cls = 'sc') => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; return d; };
+const rise = (e, t, a, d = 0.45, dist = 60) => { const p = ap(t, a, d); e.style.opacity = p; e.style.transform = `translateY(${((1 - p) * dist).toFixed(1)}px)`; };
+const put = (parent, html, css) => { const d = document.createElement('div'); d.innerHTML = html; const e = d.firstChild; e.style.cssText += css || ''; parent.appendChild(e); return e; };
+
+/* ---- scene 0: hook ---- */
+function s0() {
+  const r = el('');
+  const a1 = put(r, '<div class="big" style="font-size:132px">Ai cũng muốn</div>', 'top:560px');
+  const a2 = put(r, '<div class="big g" style="font-size:176px">rau sạch</div>', 'top:700px');
+  const b1 = put(r, '<div class="big m" style="font-size:78px">nhưng người mua vẫn còn</div>', 'top:990px');
+  const b2 = put(r, '<div class="big o" style="font-size:210px">do dự?</div>', 'top:1070px');
+  return { el: r, draw(t) {
+    rise(a1, t, ta(0, 0), 0.5); rise(a2, t, ta(0, 4), 0.5, 80);
+    rise(b1, t, ta(1, 0), 0.45); rise(b2, t, ta(1, 5), 0.5, 90);
+    const w = ap(t, ta(1, 5), 0.5); b2.style.transform += ` rotate(${(Math.sin(t * 9) * 2.2 * w).toFixed(2)}deg)`;
+  } };
+}
+
+/* ---- scene 1: 86% ---- */
+function s1() {
+  const r = el('');
+  put(r, '<div class="k">TP.HCM · 2026</div>', 'top:292px');
+  const n = put(r, '<div class="big g" style="font-size:340px">0%</div>', 'top:360px');
+  const lab = put(r, '<div class="big" style="font-size:52px;font-weight:800">người được hỏi sẵn sàng</div>', 'top:730px');
+  const lab2 = put(r, '<div class="big" style="font-size:52px;font-weight:800">trả thêm <span class="g">5–10%</span></div>', 'top:800px');
+  const grid = put(r, '<svg viewBox="0 0 1080 1920"></svg>');
+  const dots = [];
+  for (let i = 0; i < 100; i++) { const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', 340 + (i % 10) * 44); c.setAttribute('cy', 930 + Math.floor(i / 10) * 30 + 2); c.setAttribute('r', 11); c.setAttribute('fill', '#1d2e25'); grid.appendChild(c); dots.push(c); }
+  put(r, '<div class="src">Nguồn: khảo sát TP.HCM, Hiệp hội DN Hàng Việt Nam Chất lượng cao, qua HTV</div>', 'top:1262px;text-align:center;font-size:26px;left:70px;width:880px');
+  return { el: r, draw(t) {
+    const a = ta(2, 2), p = ap(t, a, 1.3), v = Math.round(86 * p);
+    n.textContent = v + '%'; n.style.opacity = ap(t, a - 0.2, 0.3); n.style.transform = `scale(${(0.92 + 0.08 * back(t, a - 0.2, 0.6)).toFixed(3)})`;
+    rise(lab, t, ta(2, 3), 0.4, 30); rise(lab2, t, ta(3, 0), 0.4, 30);
+    dots.forEach((c, i) => c.setAttribute('fill', i < v ? '#7CF29A' : '#1d2e25'));
+  } };
+}
+
+/* ---- scene 2: what buyers trust (bars grow while lines 5-8 are spoken) ---- */
+function s2() {
+  const r = el('');
+  put(r, '<div class="k">Niềm tin</div>', 'top:292px');
+  const h = put(r, '<div class="h" style="font-size:68px;top:340px">Người mua tin vào <span class="g">điều gì?</span></div>');
+  const ROWS = [
+    ['Quy trình được bảo đảm', 71.2, '#7CF29A', [5, 7]],
+    ['Theo VietGAP / GlobalGAP', 49.4, '#4fae78', [6, 3]],
+    ['Cửa hàng thực phẩm sạch', 48.7, '#4fae78', [7, 0]],
+    ['Nhãn "hữu cơ / organic"', 29.5, '#8fa196', [8, 4]],
+  ];
+  const rows = ROWS.map(([label, pct, color, [li, k]], i) => {
+    const row = put(r, `<div class="row" style="top:${500 + i * 170}px"><div class="lab">${label}</div><div class="val" style="color:${color}">0%</div><div class="bar" style="background:${color}"></div></div>`);
+    return { row, pct, li, k, bar: row.querySelector('.bar'), val: row.querySelector('.val') };
+  });
+  put(r, '<div class="src">Nguồn: Tạp chí Khoa học ĐH Yersin, người tiêu dùng TP.HCM. Chọn nhiều đáp án, không cộng thành 100%.</div>', 'top:1200px;width:850px;left:100px');
+  return { el: r, draw(t) {
+    rise(h, t, ta(4, 0), 0.45, 40);
+    rows.forEach((o) => { const a = ta(o.li, o.k), p = ap(t, a - 0.15, 0.9); o.row.style.opacity = ap(t, a - 0.3, 0.3);
+      o.bar.style.width = (o.pct / 100 * 850 * p).toFixed(1) + 'px'; o.val.textContent = fmt(o.pct * p, 1) + '%'; });
+  } };
+}
+
+/* ---- scene 3: price ---- */
+function s3() {
+  const r = el('');
+  put(r, '<div class="k">Giá bán</div>', 'top:292px');
+  const big = put(r, '<div class="big g" style="font-size:168px">+20–35%</div>', 'top:360px');
+  const sub = put(r, '<div class="big" style="font-size:50px;font-weight:800">giá rau hữu cơ so với rau thường</div>', 'top:610px');
+  const svg = put(r, '<svg viewBox="0 0 1080 1920"></svg>');
+  const NS = 'http://www.w3.org/2000/svg', mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); svg.appendChild(e); return e; };
+  const base = 1130, u = 2.6;
+  const b1 = mk('rect', { x: 250, width: 230, rx: 16, fill: '#8fa196' });
+  const b2 = mk('rect', { x: 600, width: 230, rx: 16, fill: '#7CF29A' });
+  const band = mk('rect', { x: 584, width: 262, rx: 8, fill: 'none', stroke: '#F4F8F5', 'stroke-width': 4, 'stroke-dasharray': '10 8' });
+  const t1 = mk('text', { x: 365, y: base + 56, 'text-anchor': 'middle', fill: '#F4F8F5', 'font-size': 38, 'font-weight': 800, 'font-family': 'Be Vietnam Pro' }); t1.textContent = 'Rau thường';
+  const t2 = mk('text', { x: 715, y: base + 56, 'text-anchor': 'middle', fill: '#7CF29A', 'font-size': 38, 'font-weight': 800, 'font-family': 'Be Vietnam Pro' }); t2.textContent = 'Rau hữu cơ';
+  const src = put(r, '<div class="src">Nguồn: HTV 2024 (+20–30%); Dân Việt 2021, Đơn Dương (+20–35%)</div>', 'top:1262px;text-align:center');
+  return { el: r, draw(t) {
+    const a = ta(9, 6), p = ap(t, a - 0.1, 0.9);
+    rise(big, t, a - 0.2, 0.5, 70); rise(sub, t, ta(9, 0), 0.4, 30);
+    const h1 = 100 * u * ap(t, ta(9, 3), 0.7), h2 = 100 * u * ap(t, a, 0.7) + 25 * u * ap(t, ta(9, 8), 0.7);
+    b1.setAttribute('y', base - h1); b1.setAttribute('height', h1);
+    b2.setAttribute('y', base - h2); b2.setAttribute('height', h2);
+    const hb = (35 - 20) * u * ap(t, ta(9, 8), 0.6); band.setAttribute('y', base - (100 + 35) * u); band.setAttribute('height', hb); band.setAttribute('opacity', ap(t, ta(9, 8), 0.4));
+    t1.setAttribute('opacity', ap(t, ta(9, 3), 0.4)); t2.setAttribute('opacity', ap(t, a, 0.4));
+    src.style.opacity = ap(t, ta(10, 0), 0.5) * 0.9 + 0.1;
+  } };
+}
+
+/* ---- scene 4: 96 ha of 93.800 ha ---- */
+function s4() {
+  const r = el('');
+  put(r, '<div class="k">Lâm Đồng · 2025</div>', 'top:292px');
+  const svg = put(r, '<svg viewBox="0 0 1080 1920"></svg>');
+  const NS = 'http://www.w3.org/2000/svg', mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); svg.appendChild(e); return e; };
+  const S = 640, X0 = 220, Y0 = 440, side = S * Math.sqrt(96 / 93800);
+  const big = mk('rect', { x: X0, y: Y0, width: S, height: S, rx: 12, fill: '#10201a', stroke: '#2c4638', 'stroke-width': 3 });
+  const dots = []; for (let i = 0; i < 64; i++) { const c = mk('circle', { cx: X0 + 40 + (i % 8) * 80, cy: Y0 + 40 + Math.floor(i / 8) * 80, r: 6, fill: '#1f3a2c' }); dots.push(c); }
+  const tiny = mk('rect', { x: X0 + 30, y: Y0 + S - 30 - side, width: side, height: side, fill: '#7CF29A' });
+  const ring = mk('circle', { cx: X0 + 30 + side / 2, cy: Y0 + S - 30 - side / 2, r: 36, fill: 'none', stroke: '#7CF29A', 'stroke-width': 4 });
+  const line = mk('path', { d: `M${X0 + 30 + side + 24} ${Y0 + S - 46} L${X0 + 300} ${Y0 + S - 140}`, stroke: '#7CF29A', 'stroke-width': 4, fill: 'none' });
+  const lab96 = put(r, '<div class="h g" style="font-size:96px;left:' + (X0 + 300) + 'px;width:600px;top:' + (Y0 + S - 250) + 'px;font-weight:900">96 ha</div>');
+  const lab96s = put(r, '<div class="h" style="font-size:40px;left:' + (X0 + 300) + 'px;width:600px;top:' + (Y0 + S - 150) + 'px">hữu cơ có chứng nhận</div>');
+  const labBig = put(r, '<div class="big m" style="font-size:90px">93.800 ha rau</div>', 'top:' + (Y0 + S + 30) + 'px');
+  put(r, '<div class="src">Nguồn: Chi cục Trồng trọt & BVTV Lâm Đồng. Diện tích gieo trồng ~93.800 ha/năm (10/2026); hữu cơ 96 ha (2025).</div>', 'top:1262px;width:880px;left:70px;text-align:center');
+  return { el: r, draw(t) {
+    const a = ta(11, 10), b = ta(12, 2);
+    big.setAttribute('opacity', ap(t, ta(11, 0), 0.6)); dots.forEach((c) => c.setAttribute('opacity', ap(t, ta(11, 0), 0.6)));
+    const p = back(t, a, 0.7); tiny.setAttribute('opacity', p); ring.setAttribute('opacity', ap(t, a, 0.4)); ring.setAttribute('r', 36 + 18 * (1 - ap(t, a, 0.9)));
+    line.setAttribute('opacity', ap(t, a, 0.4)); rise(lab96, t, a, 0.5, 40); rise(lab96s, t, a + 0.15, 0.5, 30);
+    rise(labBig, t, b - 0.1, 0.5, 40);
+  } };
+}
+
+/* ---- scene 5: three actions ---- */
+function s5() {
+  const r = el('');
+  put(r, '<div class="k">Chủ vườn</div>', 'top:292px');
+  const h = put(r, '<div class="h" style="font-size:78px;top:340px">Chủ vườn nên <span class="g">làm gì?</span></div>');
+  const C = [['1', 'Công khai<br>quy trình', [14, 0]], ['2', 'Làm VietGAP<br>trước', [14, 5]], ['3', 'Thùng rau<br>định kỳ', [14, 8]]];
+  const cards = C.map(([n, txt, [li, k]], i) => ({ e: put(r, `<div class="card" style="top:${560 + i * 240}px"><b>${n}</b><span>${txt}</span></div>`), li, k }));
+  return { el: r, draw(t) {
+    rise(h, t, ta(13, 0), 0.45, 40);
+    cards.forEach((c) => { const a = ta(c.li, c.k), p = back(t, a - 0.15, 0.6); c.e.style.opacity = ap(t, a - 0.2, 0.3); c.e.style.transform = `translateX(${((1 - p) * 220).toFixed(1)}px)`; });
+  } };
+}
+
+/* ---- scene 6: end card ---- */
+function s6() {
+  const r = el('');
+  const a1 = put(r, '<div class="big" style="font-size:150px">Mỗi ngày</div>', 'top:520px');
+  const a2 = put(r, '<div class="big g" style="font-size:176px">một chút</div>', 'top:680px');
+  const b = put(r, '<div class="big m" style="font-size:54px;font-weight:700">vườn lại vững hơn một chút</div>', 'top:930px');
+  const c = put(r, '<div class="big" style="font-size:96px;font-weight:900">Chi\'s Farm</div>', 'top:1090px');
+  const d = put(r, '<div class="big g" style="font-size:44px;font-weight:800;letter-spacing:.12em">THEO DÕI KÊNH</div>', 'top:1210px');
+  return { el: r, draw(t) {
+    rise(a1, t, ta(15, 0), 0.5, 70); rise(a2, t, ta(15, 4), 0.5, 80); rise(b, t, ta(16, 0), 0.5, 30);
+    rise(c, t, ta(17, 3), 0.5, 40); rise(d, t, ta(17, 5), 0.4, 20);
+  } };
+}
+
+const SC = [s0(), s1(), s2(), s3(), s4(), s5(), s6()];
+const host = document.getElementById('scenes');
+SC.forEach((s) => { s.el.style.display = 'none'; host.appendChild(s.el); });
+
+/* captions: pages of <= 5 display tokens, broken at punctuation; timed by the spoken words */
+const PAGES = [];
+DISP.forEach((d, i) => {
+  let cur = []; const flush = () => { if (cur.length) { PAGES.push(cur); cur = []; } };
+  d.forEach(([w], k) => { cur.push({ w, a: ta(i, k), b: tb(i, k) }); if (cur.length >= 5 || /[,.?!:;]$/.test(w)) flush(); });
+  flush();
+});
+const cap = document.getElementById('cap'); let capKey = -1;
+function frame(T) {
+  SC.forEach((s, i) => {
+    const sc = TL.scenes[i], inA = clamp((T - sc.a) / 0.3), outA = i === SC.length - 1 ? 1 : clamp((sc.b + 0.1 - T) / 0.3);
+    const vis = T >= sc.a - 0.001 && T <= sc.b + 0.11;
+    s.el.style.display = vis ? 'block' : 'none';
+    if (!vis) return;
+    s.el.style.opacity = ease(inA) * ease(outA);
+    s.draw(T);
+  });
+  let pi = -1; PAGES.forEach((p, i) => { if (T >= p[0].a - 0.05) pi = i; });
+  const last = pi >= 0 ? PAGES[pi][PAGES[pi].length - 1].b : 0;
+  const showing = pi >= 0 && T < last + 0.5 ? pi : -1;
+  if (showing !== capKey) { capKey = showing; cap.innerHTML = showing < 0 ? '' : PAGES[showing].map((x) => `<span>${x.w}</span>`).join(' '); }
+  if (showing >= 0) PAGES[showing].forEach((x, i) => { cap.children[i].className = T >= x.b ? 'done' : T >= x.a ? 'on' : ''; });
+}
+const B = VP.clock(100);
+VP.boot({ seek: frame, dur: DUR, cues: () => [], fonts: ['900 200px "Be Vietnam Pro"', '800 60px "Be Vietnam Pro"', '700 40px "Be Vietnam Pro"', '500 28px "Be Vietnam Pro"'] });
+window.SIZE = [W, H]; window.BPM = 100; window.B = B;
+window.AUDIT = { beats: [3, 9, 17, 22, 26, 32, 39, 46, 53], safe: [60, 220, 970, 1540], minFont: 26, ignore: ['svg'] };
+</script></body></html>

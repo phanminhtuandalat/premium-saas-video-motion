@@ -138,7 +138,10 @@
     window.DUR = dur; window.seek = async t => { t = ((t % dur) + dur) % dur; seek(t); };
     window.CUES = cues || (() => []);
     window.ready = (async () => {
-      for (const f of fonts) { try { await document.fonts.load(f); } catch (e) { } }
+      /* Google Fonts splits a family into unicode-range files; load(f) alone fetches only the latin one, so Vietnamese glyphs
+         would pop in late (blank text on the first frames of a render chunk). Ask for a Vietnamese sample too. */
+      const VI = 'aăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵAĂÂĐÊÔƠƯ';
+      for (const f of fonts) { try { await document.fonts.load(f); await document.fonts.load(f, VI); } catch (e) { } }
       await document.fonts.ready;
       await Promise.all([...document.images].map(im => im.complete ? 1 : new Promise(r => { im.onload = im.onerror = r; })));
       await window.seek(0); return true;
