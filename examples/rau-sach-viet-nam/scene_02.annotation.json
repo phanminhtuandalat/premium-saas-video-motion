@@ -1,0 +1,107 @@
+{
+  "sceneId": "scene_02",
+  "canvas": {
+    "width": 768,
+    "height": 1376
+  },
+  "storyBasis": "Giá cao hơn có thật; chứng nhận còn rất nhỏ; ba việc chủ vườn nên làm.",
+  "sceneDurationMs": 30000,
+  "elements": [
+    {
+      "id": "price",
+      "label": "Giá cao hơn 20–35%",
+      "sequence": 1,
+      "narrativeRole": "Người mua chịu trả thêm cho bằng chứng",
+      "subtitle": "Rau hữu cơ thường cao hơn 20–35%.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 110,
+        "width": 538,
+        "height": 303
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 2000,
+        "durationMs": 7000,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          120
+        ],
+        "end": [
+          633,
+          403
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "cert",
+      "label": "Chứng nhận còn nhỏ",
+      "sequence": 2,
+      "narrativeRole": "Khoảng trống chứng nhận ở Lâm Đồng",
+      "subtitle": "Lâm Đồng có khoảng 93.800 ha rau, nhưng hữu cơ chứng nhận chỉ 96 ha.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 454,
+        "width": 538,
+        "height": 372
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 10000,
+        "durationMs": 9500,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          464
+        ],
+        "end": [
+          633,
+          816
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "actions",
+      "label": "Ba việc chủ vườn nên làm",
+      "sequence": 3,
+      "narrativeRole": "Kết: hành động",
+      "subtitle": "Công khai quy trình, lấy chứng nhận, giữ khách đều đặn.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 936,
+        "width": 538,
+        "height": 344
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 20500,
+        "durationMs": 8000,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          946
+        ],
+        "end": [
+          633,
+          1270
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

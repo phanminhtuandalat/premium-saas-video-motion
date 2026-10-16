@@ -21,7 +21,7 @@ Full toolkit (engine, templates, renderer, audio tools, worked examples) lives i
 `templates/ui-loops` (8 product-UI micro-loops, 8 s seamless loop: 4:5 board or `?fx=N` single 1:1 effect, `?poster`),
 `tools/render.mjs · sheet.mjs · capture.mjs · beatgrid.py · cues.mjs · mix.py · popcheck.py`,
 `assets/audio/` (embedded music + SFX library with pre-computed BPM/drops in `library.json`, default `sfx.json`),
-`skills/premium-motion-video/references/` (aesthetics, motion-cookbook, pipeline, gotchas, reference-leo, reference-ui-loops, tts-integration, windows-setup, prompt-and-review, short-explainer-recipe, whiteboard-style).
+`skills/premium-motion-video/references/` (aesthetics, motion-cookbook, pipeline, gotchas, reference-leo, reference-ui-loops, tts-integration, windows-setup, prompt-and-review, short-explainer-recipe, whiteboard-style, previs-and-prompts).
 If the repo is reachable, use it. If not, the minimal engine + renderer at the end of this file are enough.
 
 ## Step −1 — Post a checklist before doing anything

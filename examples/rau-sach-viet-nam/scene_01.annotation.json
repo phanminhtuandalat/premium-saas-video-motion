@@ -1,0 +1,107 @@
+{
+  "sceneId": "scene_01",
+  "canvas": {
+    "width": 768,
+    "height": 1376
+  },
+  "storyBasis": "Cầu tăng nhưng người mua do dự; niềm tin dựa vào quy trình được bảo đảm hơn là nhãn organic.",
+  "sceneDurationMs": 30000,
+  "elements": [
+    {
+      "id": "doubt",
+      "label": "Người mua do dự",
+      "sequence": 1,
+      "narrativeRole": "Mở đầu: nhu cầu có, niềm tin chưa",
+      "subtitle": "Rau sạch được quan tâm, nhưng người mua vẫn do dự.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 110,
+        "width": 538,
+        "height": 344
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 2000,
+        "durationMs": 6500,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          120
+        ],
+        "end": [
+          633,
+          444
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "market",
+      "label": "Thị trường tăng",
+      "sequence": 2,
+      "narrativeRole": "Quy mô thị trường (ước tính)",
+      "subtitle": "Thị trường hữu cơ khoảng 1,0–1,2 tỷ USD (ước tính).",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 482,
+        "width": 538,
+        "height": 344
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 9500,
+        "durationMs": 8500,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          492
+        ],
+        "end": [
+          633,
+          816
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "trust",
+      "label": "Niềm tin: quy trình so với nhãn",
+      "sequence": 3,
+      "narrativeRole": "Bằng chứng quan trọng hơn nhãn",
+      "subtitle": "71,2% chọn quy trình bảo đảm, chỉ 29,5% chọn nhãn organic.",
+      "type": "structure",
+      "region": {
+        "x": 115,
+        "y": 936,
+        "width": 538,
+        "height": 344
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 19500,
+        "durationMs": 9000,
+        "maskPaddingPx": 30,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          135,
+          946
+        ],
+        "end": [
+          633,
+          1270
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

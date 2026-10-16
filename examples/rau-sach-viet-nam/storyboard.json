@@ -1,0 +1,30 @@
+{
+  "name": "Rau sạch Việt Nam: cầu tăng, niềm tin còn thiếu (BẢN NHÁP, chờ anh chốt thông điệp và số liệu)",
+  "size": [768, 1376],
+  "gap": 0.07,
+  "style": "Ảnh dọc tỉ lệ 9:16 (768×1376). Nền giấy vàng kem ấm cổ điển #F5EBD7, tuyệt đối không nền trắng. Phong cách vẽ tay tối giản: nét mực đen sạch, đường viền kín rõ ràng, nhiều khoảng trống, không đổ bóng, không gradient, không họa tiết phức tạp. Màu chỉ tô ở chi tiết trọng tâm, phẳng và nhẹ, chỉ dùng xanh dương #2E86AB, xanh lá #3B7A57, đỏ #E63946, cam #F4A261. Chừa lề trên 6% và lề dưới 10%.",
+  "images": [
+    {
+      "id": "scene_01", "sceneDurationMs": 30000, "basis": "Cầu tăng nhưng người mua do dự; niềm tin dựa vào quy trình được bảo đảm hơn là nhãn organic.",
+      "tiers": [
+        { "id": "doubt", "label": "Người mua do dự", "box": [0.15, 0.08, 0.7, 0.25], "role": "Mở đầu: nhu cầu có, niềm tin chưa", "subtitle": "Rau sạch được quan tâm, nhưng người mua vẫn do dự.", "start": 2000, "dur": 6500,
+          "desc": "một người mua đứng trước sạp rau, tay cầm giỏ, đang do dự, trên đầu có một dấu hỏi lớn màu cam." },
+        { "id": "market", "label": "Thị trường tăng", "box": [0.15, 0.35, 0.7, 0.25], "role": "Quy mô thị trường (ước tính)", "subtitle": "Thị trường hữu cơ khoảng 1,0–1,2 tỷ USD (ước tính).", "start": 9500, "dur": 8500,
+          "desc": "biểu đồ hai cột, cột trái thấp, cột phải cao hơn nhiều, một mũi tên cam chỉ lên.", "exact": ["1,0–1,2B $"] },
+        { "id": "trust", "label": "Niềm tin: quy trình so với nhãn", "box": [0.15, 0.68, 0.7, 0.25], "role": "Bằng chứng quan trọng hơn nhãn", "subtitle": "71,2% chọn quy trình bảo đảm, chỉ 29,5% chọn nhãn organic.", "start": 19500, "dur": 9000,
+          "desc": "hai cột đứng cạnh nhau. Cột trái cao, tô xanh lá, có biểu tượng khiên có dấu tích. Cột phải thấp, tô cam, có biểu tượng nhãn mác.", "exact": ["71,2%", "29,5%"] }
+      ]
+    },
+    {
+      "id": "scene_02", "sceneDurationMs": 30000, "basis": "Giá cao hơn có thật; chứng nhận còn rất nhỏ; ba việc chủ vườn nên làm.",
+      "tiers": [
+        { "id": "price", "label": "Giá cao hơn 20–35%", "box": [0.15, 0.08, 0.7, 0.22], "role": "Người mua chịu trả thêm cho bằng chứng", "subtitle": "Rau hữu cơ thường cao hơn 20–35%.", "start": 2000, "dur": 7000,
+          "desc": "hai bó rau cạnh nhau, bó phải to hơn và có thẻ giá lớn hơn, một mũi tên cam chỉ lên ở giữa.", "exact": ["+20–35%"] },
+        { "id": "cert", "label": "Chứng nhận còn nhỏ", "box": [0.15, 0.33, 0.7, 0.27], "role": "Khoảng trống chứng nhận ở Lâm Đồng", "subtitle": "Lâm Đồng có khoảng 93.800 ha rau, nhưng hữu cơ chứng nhận chỉ 96 ha.", "start": 10000, "dur": 9500,
+          "desc": "một cánh đồng rất rộng vẽ bằng nhiều hàng cây nhỏ, trong đó có một ô vuông rất nhỏ tô xanh lá.", "exact": ["96 ha", "93.800 ha"] },
+        { "id": "actions", "label": "Ba việc chủ vườn nên làm", "box": [0.15, 0.68, 0.7, 0.25], "role": "Kết: hành động", "subtitle": "Công khai quy trình, lấy chứng nhận, giữ khách đều đặn.", "start": 20500, "dur": 8000,
+          "desc": "ba biểu tượng nằm ngang cạnh nhau: một giấy chứng nhận có dấu tích xanh lá, một thùng rau, một mã QR trên điện thoại." }
+      ]
+    }
+  ]
+}
