@@ -1,0 +1,229 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Vàng sáng — bản tin 9:16 (keynote sáng, nhận dữ liệu mỗi sáng)</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800;900&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<script src="data.js"></script>
+<script src="lines.js"></script>
+<script src="timeline.js"></script>
+<script src="words.js"></script>
+<!--
+  MẪU NHẬN DỮ LIỆU MỖI SÁNG. Trang này không chứa con số nào: mọi chữ và số lấy từ window.GOLD (data.js, do parse-report.mjs
+  đọc từ báo cáo văn bản), lời đọc từ window.LINES (narration.mjs), mốc thời gian từ timeline.js và words.js (Whisper).
+  Đổi báo cáo -> chạy `node make.mjs reports/<ngày>.txt` là ra clip mới. Mọi khung hình là hàm thuần của t.
+-->
+<style>
+html,body{margin:0;background:#F5F5F7}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Be Vietnam Pro",sans-serif;color:#1D1D1F;
+ background:linear-gradient(180deg,#F8F8FA 0%,#F2F2F5 60%,#ECECF0 100%)}
+.sc{position:absolute;inset:0}
+.k{position:absolute;left:60px;width:960px;font-size:30px;font-weight:800;letter-spacing:.16em;color:#B8892B;text-transform:uppercase}
+.big{position:absolute;left:0;width:1080px;text-align:center;font-weight:900;line-height:1;letter-spacing:-.025em;white-space:nowrap}
+.gold{padding-top:.16em;margin-top:-.16em;background:linear-gradient(180deg,#E4B94B,#B8892B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mu{color:#86868B}
+.card{position:absolute;left:70px;width:940px;background:#fff;border-radius:56px;box-shadow:0 30px 80px rgba(0,0,0,.10),0 0 0 1px rgba(0,0,0,.04)}
+.lbl{font-size:34px;font-weight:700;color:#86868B}
+.chip{position:absolute;display:inline-block;padding:14px 30px;border-radius:999px;font-size:34px;font-weight:800}
+#brand{position:absolute;left:60px;top:226px;font-size:28px;font-weight:800;letter-spacing:.2em;color:#B8892B;z-index:30}
+#disc{position:absolute;left:60px;top:268px;width:960px;font-size:26px;font-weight:500;color:#86868B;z-index:30}
+#cap{position:absolute;left:60px;width:960px;top:1327px;font-size:54px;font-weight:800;line-height:1.25;text-align:center;z-index:30}
+#cap span{color:#B5B5BA}#cap span.on{color:#B8892B}#cap span.done{color:#1D1D1F}
+svg{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+</style></head>
+<body>
+<div id="stage">
+ <div id="brand"></div>
+ <div id="disc"></div>
+ <div id="scenes"></div>
+ <div id="cap"></div>
+</div>
+<script>
+const W = 1080, H = 1920, TL = window.TL, DUR = TL.dur, WORDS = window.WORDS, G = window.GOLD, LINES = window.LINES;
+const { clamp, ease, lerp } = VP;
+const ap = (t, a, d = 0.5) => ease(clamp((t - a) / d));
+const back = (t, a, d = 0.5) => { const x = clamp((t - a) / d), c = 1.4; return x <= 0 ? 0 : x >= 1 ? 1 : 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const fmt = (n, dec = 0) => n.toLocaleString('vi-VN', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const decs = (s) => (String(s).split(',')[1] || '').length;
+
+const DISP = LINES.map((l) => l.disp);
+const tok = (i, k) => {
+  const w = WORDS[TL.lines[i].id] || [], base = TL.lines[i].start;
+  let s = 0; for (let q = 0; q < k; q++) s += DISP[i][q][1];
+  const e = s + DISP[i][k][1] - 1;
+  return { a: base + (w[s] ? w[s][1] : 0), b: base + (w[e] ? w[e][2] : TL.lines[i].dur) };
+};
+const ta = (i, k) => tok(i, k).a, tb = (i, k) => tok(i, k).b;
+const find = (i, text, nth = 0) => { let n = 0; for (let k = 0; k < DISP[i].length; k++) if (DISP[i][k][0].replace(/[.,%]+$/, '') === text) { if (n++ === nth) return k; } return 0; };
+
+const el = (cls = 'sc') => { const d = document.createElement('div'); d.className = cls; return d; };
+const put = (parent, html, css) => { const d = document.createElement('div'); d.innerHTML = html; const e = d.firstChild; if (css) e.style.cssText += ';' + css; parent.appendChild(e); return e; };
+const rise = (e, t, a, d = 0.45, dist = 50) => { const p = ap(t, a, d); e.style.opacity = p; e.style.transform = `translateY(${((1 - p) * dist).toFixed(1)}px)`; };
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (svg, tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); svg.appendChild(e); return e; };
+const svgIn = (r) => put(r, '<svg viewBox="0 0 1080 1920"></svg>');
+
+document.getElementById('brand').textContent = `VÀNG SÁNG · ${G.date.d}/${G.date.m}/${G.date.y}`;
+document.getElementById('disc').textContent = G.disclaimer;
+
+/* ---- scene 0: title ---- */
+function s0() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:420px;text-align:center">Báo cáo</div>');
+  const a = put(r, '<div class="big gold" style="font-size:330px;top:500px">Vàng</div>');
+  const b = put(r, '<div class="big" style="font-size:130px;top:830px">sáng nay</div>');
+  const pill = put(r, `<div class="big mu" style="font-size:46px;font-weight:700;top:1010px">${G.date.d}/${G.date.m}/${G.date.y} · ${G.date.hh}:${G.date.mm}</div>`);
+  const note = G.weekend ? put(r, `<div class="card" style="top:1090px;height:150px;border-radius:44px;display:flex;align-items:center;padding:0 44px;box-sizing:border-box;font-size:36px;font-weight:700;line-height:1.25">${G.weekend}: thị trường trong nước nghỉ, giá giữ mức chốt cuối tuần</div>`) : null;
+  return { el: r, draw(t) {
+    rise(k, t, ta(0, 0), 0.4, 30); rise(a, t, ta(0, 0), 0.6, 90); rise(b, t, ta(0, 2), 0.5, 60); rise(pill, t, ta(0, 4), 0.4, 30);
+    if (note) rise(note, t, ta(1, 0), 0.5, 40);
+  } };
+}
+
+/* ---- scene 1: SJC buy / sell + spread ---- */
+function s1() {
+  const r = el();
+  put(r, '<div class="k" style="top:340px">SJC · triệu đồng / lượng</div>');
+  const card = put(r, '<div class="card" style="top:400px;height:480px"></div>');
+  const colB = put(r, `<div style="position:absolute;left:110px;top:450px;width:380px"><div class="lbl">MUA VÀO</div><div class="v1" style="font-size:124px;font-weight:900;letter-spacing:-.03em;line-height:1.1">0</div></div>`);
+  const colS = put(r, `<div style="position:absolute;left:540px;top:450px;width:420px"><div class="lbl">BÁN RA</div><div class="v2 gold" style="font-size:124px;font-weight:900;letter-spacing:-.03em;line-height:1.1">0</div></div>`);
+  const chip = put(r, `<div class="chip" style="left:110px;top:740px;background:#EFEFF2;color:#515154;font-size:32px">${G.sjc.unchanged ? 'Không đổi so với hôm qua' : G.sjc.change}</div>`);
+  const sp = put(r, `<div class="card" style="top:930px;height:240px;border-radius:48px"></div>`);
+  const spT = put(r, `<div style="position:absolute;left:110px;top:965px;width:860px;font-size:36px;font-weight:700;color:#86868B">Chênh lệch mua – bán</div>`);
+  const spV = put(r, `<div style="position:absolute;left:110px;top:1020px;width:860px;font-size:92px;font-weight:900;line-height:1.1"><span class="spn">0</span> <span style="font-size:44px;color:#86868B">triệu · ${G.spread.pct}%</span></div>`);
+  const spN = put(r, `<div style="position:absolute;left:110px;top:1125px;width:860px;font-size:32px;font-weight:700;color:#B8892B">Mua xong bán lại ngay là mất ${G.spread.tr} triệu</div>`);
+  const v1 = colB.querySelector('.v1'), v2 = colS.querySelector('.v2'), spn = spV.querySelector('.spn');
+  return { el: r, draw(t) {
+    const a1 = ta(2, find(2, G.sjc.buy)), a2 = ta(2, find(2, G.sjc.sell)), a3 = ta(3, find(3, G.spread.tr, 0));
+    rise(card, t, a1 - 0.5, 0.5, 40);
+    const p1 = ap(t, a1 - 0.1, 0.8), p2 = ap(t, a2 - 0.1, 0.8), p3 = ap(t, a3 - 0.1, 0.7);
+    colB.style.opacity = ap(t, a1 - 0.4, 0.3); colS.style.opacity = ap(t, a2 - 0.4, 0.3);
+    v1.textContent = fmt(G.sjc.v.buy * p1, decs(G.sjc.buy)); v2.textContent = fmt(G.sjc.v.sell * p2, decs(G.sjc.sell));
+    rise(chip, t, ta(2, DISP[2].length - 4), 0.4, 20);
+    rise(sp, t, ta(3, 0) - 0.1, 0.5, 40); sp.style.opacity = ap(t, ta(3, 0) - 0.1, 0.4); spT.style.opacity = spV.style.opacity = sp.style.opacity;
+    spn.textContent = fmt(G.spread.v * p3, decs(G.spread.tr)); rise(spN, t, ta(3, DISP[3].length - 6), 0.45, 20);
+  } };
+}
+
+/* ---- scene 2: world gold price and where it sits in the 30-day range ---- */
+function s2() {
+  const r = el();
+  put(r, '<div class="k" style="top:340px;text-align:center">Vàng thế giới · USD / ounce</div>');
+  const n = put(r, '<div class="big" style="font-size:186px;top:440px">$0</div>');
+  const svg = svgIn(r);
+  const X0 = 140, X1 = 940, Y = 880, lo = G.xau.vlo, hi = G.xau.vhi, pos = (v) => X0 + (v - lo) / (hi - lo) * (X1 - X0);
+  const track = mk(svg, 'rect', { x: X0, y: Y - 8, width: X1 - X0, height: 16, rx: 8, fill: '#DADADF' });
+  const fillr = mk(svg, 'rect', { x: X0, y: Y - 8, height: 16, rx: 8, fill: '#E4B94B', width: 0 });
+  const dot = mk(svg, 'circle', { cx: X0, cy: Y, r: 26, fill: '#fff', stroke: '#B8892B', 'stroke-width': 8 });
+  const tl = put(r, `<div style="position:absolute;left:${X0 - 70}px;top:${Y + 50}px;width:240px;font-size:32px;font-weight:700;color:#86868B;text-align:left">${G.xau.lo}<br><span style="font-size:28px;font-weight:500">đáy 30 phiên</span></div>`);
+  const tr = put(r, `<div style="position:absolute;left:${X1 - 210}px;top:${Y + 50}px;width:240px;font-size:32px;font-weight:700;color:#86868B;text-align:right">${G.xau.hi}<br><span style="font-size:28px;font-weight:500">đỉnh ${G.xau.peakD}/${G.xau.peakM}</span></div>`);
+  const chip = put(r, `<div class="chip" style="left:340px;top:1060px;background:#FFE9E7;color:#C0392B">−${G.xau.fromPeak}% so với đỉnh</div>`);
+  return { el: r, draw(t) {
+    const a = ta(4, find(4, G.xau.price)), p = ap(t, a - 0.1, 1.0);
+    n.style.opacity = ap(t, a - 0.3, 0.3); n.textContent = '$' + fmt(G.xau.v.valueOf() * p, 1 && decs(G.xau.price));
+    const x = pos(G.xau.v) ; const px = lerp(X0, x, p);
+    dot.setAttribute('cx', px.toFixed(1)); fillr.setAttribute('width', (px - X0).toFixed(1));
+    track.setAttribute('opacity', ap(t, a - 0.3, 0.4)); dot.setAttribute('opacity', ap(t, a - 0.3, 0.4)); tl.style.opacity = tr.style.opacity = ap(t, a, 0.5);
+    rise(chip, t, ta(4, DISP[4].length - 3), 0.45, 24);
+  } };
+}
+
+/* ---- scene 3: SJC sell vs world price converted (axis starts at 0) ---- */
+function s3() {
+  const r = el();
+  put(r, '<div class="k" style="top:340px">SJC so với thế giới · triệu đồng / lượng</div>');
+  const svg = svgIn(r);
+  const X0 = 100, MAXW = 860, max = G.sjc.v.sell, wOf = (v) => v / max * MAXW;
+  const r1 = mk(svg, 'rect', { x: X0, y: 520, height: 120, rx: 24, fill: '#E4B94B', width: 0 });
+  const r2 = mk(svg, 'rect', { x: X0, y: 760, height: 120, rx: 24, fill: '#C9C9CF', width: 0 });
+  const t1 = put(r, `<div style="position:absolute;left:100px;top:460px;font-size:34px;font-weight:700;color:#86868B">SJC bán ra</div>`);
+  const t2 = put(r, `<div style="position:absolute;left:100px;top:700px;font-size:34px;font-weight:700;color:#86868B">Giá thế giới quy đổi</div>`);
+  const v1 = put(r, `<div style="position:absolute;left:100px;top:535px;width:830px;text-align:right;font-size:80px;font-weight:900;color:#fff;line-height:1.1">${G.sjc.sell}</div>`);
+  const v2 = put(r, `<div style="position:absolute;left:100px;top:775px;width:${Math.round(wOf(G.conv.v)) - 30}px;text-align:right;font-size:80px;font-weight:900;color:#1D1D1F;line-height:1.1">${G.conv.er}</div>`);
+  const gap = mk(svg, 'rect', { x: X0 + wOf(G.conv.v), y: 520, width: wOf(max - G.conv.v), height: 360, rx: 10, fill: 'none', stroke: '#C0392B', 'stroke-width': 5, 'stroke-dasharray': '12 10' });
+  const big = put(r, `<div class="big" style="font-size:190px;top:960px;color:#C0392B">+${G.premium.pct}%</div>`);
+  const sub = put(r, `<div class="big mu" style="font-size:44px;font-weight:700;top:1170px">SJC cao hơn ${G.premium.tr} triệu đồng một lượng</div>`);
+  return { el: r, draw(t) {
+    const a = ta(5, 0), p1 = ap(t, a, 0.8), p2 = ap(t, a + 0.7, 0.8);
+    r1.setAttribute('width', (wOf(G.sjc.v.sell) * p1).toFixed(1)); r2.setAttribute('width', (wOf(G.conv.v) * p2).toFixed(1));
+    t1.style.opacity = v1.style.opacity = p1; t2.style.opacity = v2.style.opacity = p2;
+    const ak = ta(5, find(5, G.premium.pct)), pg = ap(t, ak - 0.1, 0.6);
+    gap.setAttribute('opacity', pg); rise(big, t, ak - 0.1, 0.55, 60); rise(sub, t, ta(5, DISP[5].length - 5), 0.45, 24);
+  } };
+}
+
+/* ---- scene 4: levels ladder (SJC) + world levels ---- */
+function s4() {
+  const r = el();
+  put(r, '<div class="k" style="top:340px">Ngưỡng cần theo dõi · SJC (triệu)</div>');
+  const svg = svgIn(r);
+  const L = G.levels, vals = [...L.v.res, G.sjc.v.sell, ...L.v.sup], top = 480, bot = 1130, vmax = Math.max(...vals) + 0.6, vmin = Math.min(...vals) - 0.6;
+  const y = (v) => top + (vmax - v) / (vmax - vmin) * (bot - top);
+  mk(svg, 'rect', { x: 250, y: top - 20, width: 10, height: bot - top + 40, rx: 5, fill: '#DADADF' });
+  const items = [
+    { v: L.v.res[1], s: L.sjcRes[1], role: 'kháng cự', c: '#C0392B', li: 6, k: DISP[6].length - 1 },
+    { v: L.v.res[0], s: L.sjcRes[0], role: 'kháng cự', c: '#C0392B', li: 6, k: find(6, L.sjcRes[0]) },
+    { v: G.sjc.v.sell, s: G.sjc.sell, role: 'hiện tại', c: '#B8892B', cur: true, li: 6, k: 0 },
+    { v: L.v.sup[0], s: L.sjcSup[0], role: 'hỗ trợ', c: '#1E8E5A', li: 6, k: find(6, L.sjcSup[0]) },
+    { v: L.v.sup[1], s: L.sjcSup[1], role: 'hỗ trợ', c: '#1E8E5A', li: 6, k: 0 },
+  ];
+  const nodes = items.map((it) => {
+    const yy = y(it.v), c = mk(svg, 'circle', { cx: 255, cy: yy, r: it.cur ? 24 : 16, fill: it.cur ? '#B8892B' : '#fff', stroke: it.c, 'stroke-width': 7, opacity: 0 });
+    const lab = put(r, `<div style="position:absolute;left:310px;top:${yy - 36}px;width:700px;display:flex;align-items:baseline;gap:22px;opacity:0"><span style="font-size:${it.cur ? 76 : 64}px;font-weight:900;color:${it.cur ? '#1D1D1F' : it.c}">${it.s}</span><span style="font-size:32px;font-weight:700;color:#86868B">${it.role}</span></div>`);
+    return { c, lab, it };
+  });
+  const xl = put(r, `<div class="card" style="top:1180px;height:110px;border-radius:40px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;box-sizing:border-box">Thế giới: hỗ trợ ${L.xauSup} · kháng cự ${L.xauRes[0]}</div>`);
+  return { el: r, draw(t) {
+    const order = [2, 1, 0, 3, 4];
+    nodes.forEach((n, j) => {
+      const a = n.it.cur ? ta(6, 0) : (n.it.k ? ta(6, n.it.k) : ta(6, 0) + 0.2 + j * 0.35);
+      const p = back(t, a - 0.1, 0.5); n.c.setAttribute('opacity', ap(t, a - 0.1, 0.3)); n.lab.style.opacity = ap(t, a - 0.1, 0.3);
+      n.lab.style.transform = `translateX(${((1 - p) * 40).toFixed(1)}px)`;
+    });
+    rise(xl, t, ta(6, DISP[6].length - 3), 0.5, 30);
+  } };
+}
+
+/* ---- scene 5: verdict + disclaimer ---- */
+function s5() {
+  const r = el();
+  put(r, '<div class="k" style="top:420px;text-align:center">Theo báo cáo</div>');
+  const v = put(r, `<div class="big gold" style="font-size:340px;top:490px">${G.rec.verdict}</div>`);
+  const d = put(r, `<div class="big" style="font-size:54px;font-weight:800;top:840px;white-space:normal;line-height:1.2;padding:0 90px;box-sizing:border-box">${G.rec.detail.replace(/[.\s]+$/, '')}</div>`);
+  const card = put(r, `<div class="card" style="top:1040px;height:200px;border-radius:44px;display:flex;flex-direction:column;justify-content:center;padding:0 50px;box-sizing:border-box"><div style="font-size:40px;font-weight:800;color:#C0392B">${G.disclaimer}</div><div style="font-size:26px;font-weight:500;color:#86868B;margin-top:14px;line-height:1.25">Nguồn: ${G.sources.slice(0, 120)}${G.sources.length > 120 ? '…' : ''}</div></div>`);
+  return { el: r, draw(t) {
+    rise(v, t, ta(7, 2), 0.6, 90); rise(d, t, ta(7, 3), 0.5, 30); rise(card, t, ta(8, 0), 0.5, 40);
+  } };
+}
+
+const SC = [s0(), s1(), s2(), s3(), s4(), s5()];
+const host = document.getElementById('scenes');
+SC.forEach((s) => { s.el.style.display = 'none'; host.appendChild(s.el); });
+
+/* captions: pages of <= 5 display tokens, broken at punctuation */
+const PAGES = [];
+DISP.forEach((d, i) => {
+  let cur = []; const flush = () => { if (cur.length) { PAGES.push(cur); cur = []; } };
+  d.forEach(([w], k) => { cur.push({ w, a: ta(i, k), b: tb(i, k) }); if (cur.length >= 5 || /[,.?!:;]$/.test(w)) flush(); });
+  flush();
+});
+const cap = document.getElementById('cap'); let capKey = -1;
+function frame(T) {
+  SC.forEach((s, i) => {
+    const sc = TL.scenes[i], inA = clamp((T - sc.a) / 0.3), outA = i === SC.length - 1 ? 1 : clamp((sc.b + 0.1 - T) / 0.3);
+    const vis = T >= sc.a - 0.001 && T <= sc.b + 0.11;
+    s.el.style.display = vis ? 'block' : 'none';
+    if (!vis) return;
+    s.el.style.opacity = ease(inA) * ease(outA);
+    s.draw(T);
+  });
+  let pi = -1; PAGES.forEach((p, i) => { if (T >= p[0].a - 0.05) pi = i; });
+  const last = pi >= 0 ? PAGES[pi][PAGES[pi].length - 1].b : 0;
+  const showing = pi >= 0 && T < last + 0.5 ? pi : -1;
+  if (showing !== capKey) { capKey = showing; cap.innerHTML = showing < 0 ? '' : PAGES[showing].map((x) => `<span>${x.w}</span>`).join(' '); }
+  if (showing >= 0) PAGES[showing].forEach((x, i) => { cap.children[i].className = T >= x.b ? 'done' : T >= x.a ? 'on' : ''; });
+}
+const B = VP.clock(100);
+VP.boot({ seek: frame, dur: DUR, cues: () => [], fonts: ['900 200px "Be Vietnam Pro"', '800 60px "Be Vietnam Pro"', '700 40px "Be Vietnam Pro"', '500 28px "Be Vietnam Pro"'] });
+window.SIZE = [W, H]; window.BPM = 100; window.B = B;
+window.AUDIT = { beats: TL.scenes.map((s) => +((s.a + s.b) / 2).toFixed(1)), safe: [60, 220, 970, 1540], minFont: 26, ignore: ['svg'] };
+</script></body></html>

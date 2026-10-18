@@ -1,0 +1,77 @@
+{
+ "date": {
+  "d": "18",
+  "m": "10",
+  "y": "2026",
+  "hh": "07",
+  "mm": "05"
+ },
+ "weekend": "Chủ nhật",
+ "sjc": {
+  "buy": "140,6",
+  "sell": "143,6",
+  "change": "không đổi so với 17/10",
+  "unchanged": true,
+  "v": {
+   "buy": 140.6,
+   "sell": 143.6
+  }
+ },
+ "spread": {
+  "tr": "3,0",
+  "pct": "2,13",
+  "v": 3
+ },
+ "xau": {
+  "price": "4.166,1",
+  "v": 4166.1,
+  "lo": "4.107,9",
+  "hi": "4.424,9",
+  "peakD": "18",
+  "peakM": "09",
+  "fromPeak": "5,5",
+  "vlo": 4107.9,
+  "vhi": 4424.9
+ },
+ "conv": {
+  "er": "129,94",
+  "vcb": "131,00",
+  "v": 129.94
+ },
+ "premium": {
+  "tr": "13,66",
+  "pct": "10,5",
+  "v": 10.5
+ },
+ "levels": {
+  "sjcSup": [
+   "142,4",
+   "140,0"
+  ],
+  "sjcRes": [
+   "144,8",
+   "147,6"
+  ],
+  "xauSup": "4.100",
+  "xauRes": [
+   "4.200",
+   "4.425"
+  ],
+  "v": {
+   "sup": [
+    142.4,
+    140
+   ],
+   "res": [
+    144.8,
+    147.6
+   ]
+  }
+ },
+ "rec": {
+  "verdict": "GIỮ",
+  "detail": "chưa mua mới, chưa bán tháo"
+ },
+ "sources": "BTMC API, vanghomnay.vn (18/10 07:02), gold-api.com, Yahoo Finance (GC=F, DXY, ^TNX), Vietcombank, open.er-api.com, QĐND/VOV/Laodong",
+ "disclaimer": "Tham khảo, không phải khuyến nghị tài chính."
+}

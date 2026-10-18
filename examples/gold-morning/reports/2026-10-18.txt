@@ -1,0 +1,55 @@
+🥇 BÁO CÁO VÀNG SÁNG — 18/10/2026 (07:05)
+
+⚠️ Hôm nay Chủ nhật — thị trường trong nước nghỉ giao dịch; giá giữ mức chốt cuối tuần (cập nhật 07:02).
+
+1️⃣ Giá trong nước (triệu đ/lượng)
+• SJC: mua 140,6 — bán 143,6 (không đổi so với 17/10)
+• Nhẫn tròn BTMC (VRTL): 138,4 — 142,4
+• DOJI: 140,6 — 143,6 | PNJ: 140,1 — 143,1 | Phú Quý: 140,0 — 143,6
+• Spread SJC: 3,0 tr (2,13%) — mua xong bán lại ngay mất 3 tr
+
+2️⃣ Giá thế giới
+• XAU spot: $4.166,1/oz (07:00 VN)
+• GC=F (kỳ hạn, chốt 16/10): $4.181,1 — +0,98% trong 7 phiên
+• Vùng 30 phiên: 4.107,9 – 4.424,9 (đỉnh 18/09) → hiện -5,5% từ đỉnh
+
+3️⃣ Tỷ giá
+• USD/VND liên ngân hàng: 25.868,9
+• Vietcombank: mua 25.670 — bán 26.080
+• DXY: 101,84 (-0,39% / 7 phiên; nền 30 phiên 100,22–102,58) → USD đang suy yếu nhẹ, có lợi cho vàng
+
+4️⃣ Lãi suất & macro
+• US10Y: 5,10% (-21 bps so với 5,31 hồi đầu tháng) → lực hỗ trợ vàng
+• Nhưng CPI Mỹ nóng hơn dự báo → Fed bị kẹt, thị trường chưa dám định giá nới lỏng → vàng "mắc kẹt" 4.100–4.200
+
+5️⃣ Chênh lệch SJC – thế giới (điểm đáng lo nhất)
+• Quy đổi: 129,94 tr (tỷ giá ER) / 131,00 tr (VCB bán)
+• Premium bán: +13,66 tr (~10,5%); premium mua: +10,66 tr (~8,2%)
+• Ngưỡng skill 5 tr/8 tr đã bị vượt xa từ lâu do SJC độc quyền — nhưng 10,5% là vùng cao, rủi ro hội tụ về giá trị thực
+• Tuần này SJC chỉ giảm 0,83% trong khi TG -5,5% từ đỉnh → SJC giữ giá, premium còn nới rộng
+
+6️⃣ Kỹ thuật & động lượng
+• 30 phiên: 147,6 → 143,6 = -2,71% (đã điều chỉnh >2%)
+• 7 phiên: 144,8 → 143,6 = -0,83%
+• 2 phiên gần nhất (17–18/10): đi ngang 143,6 — vol 30 phiên chỉ 0,54%/ngày → sideway biên hẹp
+• Đáy 30 phiên: 142,4 (28–29/09) — giá hiện cách đáy chỉ 1,2 tr
+
+7️⃣ Tin tức / catalyst
+• Fed chờ tín hiệu lãi suất, CPI tháng 9 làm tăng sức ép — vàng chốt tuần trong sắc đỏ
+• Dòng vốn Trung Quốc đổ vào vàng mạnh, nhà đầu tư tranh thủ mua gom ở vùng đáy
+• Quy định mới: mua–bán vàng từ 5 triệu đồng phải thanh toán không dùng tiền mặt → thay đổi thanh khoản thị trường vật chất, cần theo dõi
+
+---
+🎯 KHUYẾN NGHỊ: GIỮ — chưa mua mới, chưa bán tháo
+
+Lý do:
+• Không mua mới: premium 10,5% + spread 3 tr → mua là lỗ ngay ~3 tr/lượng, và rủi ro hội tụ premium khi TG hồi
+• Không bán: giá đang sát đáy 30 phiên (142,4), TG có hỗ trợ cứng 4.100 và US10Y đang giảm
+• Chờ xác nhận: cần 1 phiên phá 144,8 (→ mua theo xu hướng) hoặc thủng 142,4 (→ cắt, chờ 140,0)
+
+Ngưỡng quan trọng
+• SJC: hỗ trợ 142,4 → 140,0 | kháng cự 144,8 → 147,6
+• XAU: hỗ trợ 4.100 | kháng cự 4.200 → 4.425
+
+📍 Nguồn: BTMC API, vanghomnay.vn (18/10 07:02), gold-api.com, Yahoo Finance (GC=F, DXY, ^TNX), Vietcombank, open.er-api.com, QĐND/VOV/Laodong
+⚠️ Tham khảo, không phải khuyến nghị tài chính.
