@@ -1,1 +1,42 @@
-[{"id":"k01","text":"Sản phẩm mới đã có mặt."},{"id":"k02","text":"Nhanh hơn, gọn hơn, dễ dùng hơn."},{"id":"k03","text":"Tăng năm mươi phần trăm hiệu quả."},{"id":"k04","text":"Bắt đầu ngay hôm nay."}]
+[
+ {
+  "id": "s0",
+  "shot": 0,
+  "text": "Gặp Lumen."
+ },
+ {
+  "id": "s1",
+  "shot": 1,
+  "text": "Ghi chú biết nghĩ."
+ },
+ {
+  "id": "s2",
+  "shot": 2,
+  "text": "Ý tưởng được giữ đẹp."
+ },
+ {
+  "id": "s3",
+  "shot": 3,
+  "text": "Nhanh hơn gấp mười lần."
+ },
+ {
+  "id": "s4",
+  "shot": 4,
+  "text": "Chụp thông minh, tự tóm tắt."
+ },
+ {
+  "id": "s5",
+  "shot": 5,
+  "text": "Một triệu ghi chú mỗi tuần."
+ },
+ {
+  "id": "s7",
+  "shot": 7,
+  "text": "Thói quen, không chỉ ứng dụng."
+ },
+ {
+  "id": "s8",
+  "shot": 8,
+  "text": "Lumen, có mặt hôm nay."
+ }
+]
