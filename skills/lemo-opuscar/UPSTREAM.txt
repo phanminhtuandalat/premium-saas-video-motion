@@ -1,0 +1,2 @@
+Vendored from https://github.com/lemomo-ai/lemo-opuscar (MIT) at commit 508848acb2b4930c4041fef4d594120da1525bff, 2026-10-19.
+Only the guides and each style's STYLE.md/DEMO.md/style.json are copied; demo source, posters and core/ tools (~190 MB) are NOT, run scripts/setup.sh to fetch the full library.
