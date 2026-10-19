@@ -21,3 +21,18 @@ examples/*/out/
 **/.omc/
 examples/**/*.mp4
 examples/*/footage/*/
+
+# lemo-opuscar: full upstream library is local-only (guides + STYLE.md stay tracked)
+skills/lemo-opuscar/core/
+skills/lemo-opuscar/styleboard/
+skills/lemo-opuscar/docs/
+skills/lemo-opuscar/tools/
+skills/lemo-opuscar/plugin/
+skills/lemo-opuscar/.github/
+skills/lemo-opuscar/.claude-plugin/
+skills/lemo-opuscar/styles/*/demo/
+skills/lemo-opuscar/styles/*/*.jpg
+skills/lemo-opuscar/styles/*/*.png
+skills/lemo-opuscar/styles/*/*.srt
+skills/lemo-opuscar/node_modules/
+skills/lemo-opuscar/.venv/
