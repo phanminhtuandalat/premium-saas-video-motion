@@ -36,3 +36,6 @@ skills/lemo-opuscar/styles/*/*.png
 skills/lemo-opuscar/styles/*/*.srt
 skills/lemo-opuscar/node_modules/
 skills/lemo-opuscar/.venv/
+
+# third-party SFX pack from a shared Drive folder: local only
+assets/audio/sfx-drive/
