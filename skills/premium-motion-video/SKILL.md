@@ -170,6 +170,9 @@ motion (button press, card grow, number count, cursor). Illustrative data only w
 4. **Mix.** VO is the lead: music ducked 8–12 dB under speech (e.g. ffmpeg
    `[music][vo]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=400`), SFX lighter than without VO, final
    loudness ≈ −14 LUFS with VO peaks ≈ −1.5 dBTP. Check intelligibility on laptop speakers.
+   Measure the gap on the stems with `python3 tools/audiogap.py voice.wav music.wav` (flags < 6 dB or > 15 dB; the
+   stick-figure pipeline accepts 4–6 dB, other agents use up to 15 dB for loud tracks — one listen decides).
+   Before the VO text is fixed run `node tools/aiwords.mjs <lines.json>` (banned AI-sounding words and sentence frames).
 5. Burned-in karaoke captions come free from `words.js` (Vietnamese: keep diacritics, ≤ 2 lines, ≥ 44 px at 1080p; pages split at
    punctuation, current word highlighted; `"captions": false` in the film's spec turns them off). In 9:16 captions sit in the
    bottom platform-UI zone — check with `sheet.mjs --safe` and tell the user.

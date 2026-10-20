@@ -3,7 +3,7 @@
 Ai cũng muốn ăn rau sạch.
 
 2
-00:00:02,134 --> 00:00:05,014
+00:00:02,134 --> 00:00:04,974
 Nhưng người mua vẫn còn do dự?
 
 3
@@ -15,7 +15,7 @@ Nhưng người mua vẫn còn do dự?
 sẵn sàng trả thêm 5 đến 10%
 
 5
-00:00:15,355 --> 00:00:17,718
+00:00:15,355 --> 00:00:17,690
 Vậy họ tin vào điều gì nhất?
 
 6
@@ -27,7 +27,7 @@ Quy trình sản xuất được bảo đảm, 71,2% chọn
 Kế đến là VietGAP
 
 8
-00:00:25,967 --> 00:00:27,658
+00:00:25,967 --> 00:00:27,627
 và cửa hàng rau sạch
 
 9
@@ -39,7 +39,7 @@ Còn nhãn organic chỉ 29,5% chọn
 Rau hữu cơ thường cao hơn 20 đến 35%
 
 11
-00:00:39,170 --> 00:00:41,549
+00:00:39,170 --> 00:00:41,510
 vì người mua trả tiền cho bằng chứng
 
 12
@@ -51,11 +51,11 @@ Nhưng ở Lâm Đồng, hữu cơ chứng nhận chỉ 96 ha
 trên khoảng 93.800 ha rau
 
 14
-00:00:50,750 --> 00:00:52,640
+00:00:50,750 --> 00:00:52,550
 Vậy chủ vườn làm gì?
 
 15
-00:00:52,740 --> 00:00:57,169
+00:00:52,740 --> 00:00:57,080
 Công khai quy trình, làm VietGAP, thử thùng rau định kỳ
 
 16
