@@ -1,0 +1,23 @@
+{
+  "name": "remotion-lab",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio --port 3417",
+    "render": "remotion render src/index.ts Hello out/hello.mp4 --port 3417",
+    "render:gold": "remotion render src/index.ts Gold out/gold-remotion.mp4 --port 3417 --gl=angle --concurrency=2"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.2",
+    "@remotion/cli": "^4.0.538",
+    "@remotion/three": "^4.0.538",
+    "@types/react": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.538",
+    "three": "^0.186.1",
+    "typescript": "^7.0.2"
+  }
+}

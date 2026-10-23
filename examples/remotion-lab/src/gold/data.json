@@ -1,0 +1,16 @@
+{
+ "date": { "d": "23", "m": "10", "y": "2026", "hh": "07", "mm": "00" },
+ "sjc": { "buy": "139,3", "sell": "142,3", "v": { "buy": 139.3, "sell": 142.3 } },
+ "miHong": { "buy": "140,8", "v": 140.8 },
+ "btmc": { "buy": "138,1" },
+ "sellGap": "2,7",
+ "xau": { "price": "4.024,8", "v": 4024.8, "chg": "2,7", "fromPeak": "7,8" },
+ "conv": { "vn": "125,42", "v": 125.42 },
+ "premium": { "tr": "16,88", "pct": "13,5", "v": 13.5, "ceil": "12" },
+ "macro": { "fed": "25", "vote": "12–0", "us10y": "4,95", "dxy": "101,57" },
+ "trend": { "days": "4", "drop": "1,4", "peak": "191,3", "peakV": 191.3, "fromPeak": "25,6" },
+ "levels": { "xauRes": ["4.150", "4.100"], "xauSup": ["4.000", "3.950"], "sjcBuyLo": "138", "sjcBuyHi": "139", "sjcSellLo": "142,3", "sjcSellHi": "143,7" },
+ "rec": { "verdict": "GIỮ", "sub": "KHÔNG MUA MỚI" },
+ "sources": "BTMC API, gold-api XAU, Yahoo Finance, open.er-api, Vietcombank, Kitco, Reuters, VOV, Dân trí",
+ "disclaimer": "Tham khảo, không phải khuyến nghị tài chính."
+}
