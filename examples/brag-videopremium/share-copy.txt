@@ -1,0 +1,1 @@
+Phim quảng cáo viết bằng HTML, render ra MP4 chính xác từng khung hình. Từ nhạc đến file video trong 10 phút, có kiểm tra khung giật, âm lượng −14 LUFS và chữ chồng chéo trước khi giao.

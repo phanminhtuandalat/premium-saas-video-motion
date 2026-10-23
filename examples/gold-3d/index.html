@@ -1,0 +1,254 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Vàng sáng 3D — bản tin 9:16 (khối 3D xoay + số liệu)</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800;900&display=block" rel="stylesheet">
+<script src="../../engine/motion.js"></script>
+<script src="../../engine/vendor/three.min.js"></script>
+<script src="../../engine/scene3d.js"></script>
+<script src="data.js"></script>
+<script src="lines.js"></script>
+<script src="timeline.js"></script>
+<script src="words.js"></script>
+<!--
+  VÀNG SÁNG 3D. Nền là cảnh 3D `orbit` của engine/scene3d.js (khối đa diện + hạt, camera quay quanh): vàng kim cho cảnh trung tính,
+  đỏ cho cảnh giá giảm. Mỗi cảnh bắt đầu lại nhịp 3D (khối bật lên) nên trông như một cú cắt. Trang không chứa con số nào:
+  mọi chữ và số lấy từ window.GOLD (data.json), lời đọc từ window.LINES, mốc thời gian từ timeline.js + words.js (Whisper).
+  Mọi khung hình là hàm thuần của t.
+-->
+<style>
+html,body{margin:0;background:#05060A}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Be Vietnam Pro",sans-serif;color:#F4F1EA;background:#05060A}
+#bg{position:absolute;left:-420px;top:0;width:1920px;height:1920px;transform-origin:50% 50%;transform:translateY(-560px) scale(.5);
+ -webkit-mask-image:linear-gradient(#000 72%,transparent 100%);mask-image:linear-gradient(#000 72%,transparent 100%)}
+#bg canvas{position:absolute;left:0;top:0;width:1920px;height:1920px}
+.sc{position:absolute;inset:0}
+.k{position:absolute;left:60px;width:960px;font-size:30px;font-weight:800;letter-spacing:.14em;color:#E4B94B;text-transform:uppercase}
+.big{position:absolute;left:0;width:1080px;text-align:center;font-weight:900;line-height:1;letter-spacing:-.025em;white-space:nowrap}
+.gold{padding-top:.16em;margin-top:-.16em;background:linear-gradient(180deg,#FFE2A0,#D4A53A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.red{color:#FF6B6B}.grn{color:#3DDC97}.mu{color:#8A8F9A}
+.card{position:absolute;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:40px;box-sizing:border-box;backdrop-filter:none}
+.lbl{font-size:28px;font-weight:700;color:#8A8F9A;letter-spacing:.06em}
+.chip{position:absolute;display:inline-block;padding:12px 28px;border-radius:999px;font-size:34px;font-weight:800;white-space:nowrap}
+.bar{position:absolute;left:100px;height:76px;border-radius:20px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;box-sizing:border-box;font-weight:900;white-space:nowrap}
+.bar b{font-size:30px;font-weight:700}.bar i{font-style:normal;font-size:50px}
+#brand{text-shadow:0 0 10px #05060A,0 0 4px #05060A;position:absolute;left:60px;top:226px;font-size:28px;font-weight:800;letter-spacing:.2em;color:#E4B94B;z-index:30}
+#disc{text-shadow:0 0 10px #05060A,0 0 4px #05060A;position:absolute;left:60px;top:268px;width:960px;font-size:26px;font-weight:500;color:#8A8F9A;z-index:30}
+#cap{position:absolute;left:60px;width:960px;top:1327px;font-size:54px;font-weight:800;line-height:1.25;text-align:center;z-index:30}
+#cap span{color:#5A5F6B}#cap span.on{color:#FFD98A}#cap span.done{color:#F4F1EA}
+</style></head>
+<body>
+<div id="stage">
+ <div id="bg"></div>
+ <div id="brand"></div>
+ <div id="disc"></div>
+ <div id="scenes"></div>
+ <div id="cap"></div>
+</div>
+<script>
+const W = 1080, H = 1920, TL = window.TL, DUR = TL.dur, WORDS = window.WORDS, G = window.GOLD, LINES = window.LINES;
+const { clamp, ease, lerp } = VP;
+const BPM = 100, B = VP.clock(BPM);
+const ap = (t, a, d = 0.5) => ease(clamp((t - a) / d));
+const back = (t, a, d = 0.5) => { const x = clamp((t - a) / d), c = 1.4; return x <= 0 ? 0 : x >= 1 ? 1 : 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const fmt = (n, dec = 0) => n.toLocaleString('vi-VN', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const decs = (s) => (String(s).split(',')[1] || '').length;
+
+const DISP = LINES.map((l) => l.disp);
+const tok = (i, k) => {
+  const w = WORDS[TL.lines[i].id] || [], base = TL.lines[i].start;
+  let s = 0; for (let q = 0; q < k; q++) s += DISP[i][q][1];
+  const e = s + DISP[i][k][1] - 1;
+  return { a: base + (w[s] ? w[s][1] : 0), b: base + (w[e] ? w[e][2] : TL.lines[i].dur) };
+};
+const ta = (i, k) => tok(i, k).a, tb = (i, k) => tok(i, k).b;
+const find = (i, text, nth = 0) => { let n = 0; for (let k = 0; k < DISP[i].length; k++) if (DISP[i][k][0].replace(/[.,%]+$/, '') === text) { if (n++ === nth) return k; } return 0; };
+const lineStart = (i) => TL.lines[i].start;
+
+const el = (cls = 'sc') => { const d = document.createElement('div'); d.className = cls; return d; };
+const put = (parent, html, css) => { const d = document.createElement('div'); d.innerHTML = html; const e = d.firstChild; if (css) e.style.cssText += ';' + css; parent.appendChild(e); return e; };
+const rise = (e, t, a, d = 0.45, dist = 50) => { const p = ap(t, a, d); e.style.opacity = p; e.style.transform = `translateY(${((1 - p) * dist).toFixed(1)}px)`; };
+
+document.getElementById('brand').textContent = `VÀNG SÁNG · ${G.date.d}/${G.date.m}/${G.date.y}`;
+document.getElementById('disc').textContent = G.disclaimer;
+
+/* ---- 3D backdrops: gold for neutral scenes, red for falling ones ---- */
+const BG = {
+  gold: VP3.make('orbit', { w: H, h: H, colors: ['#E4B94B', '#FFE2A0'], bg: '#05060A', seed: 7, turns: .35 }),
+  red: VP3.make('orbit', { w: H, h: H, colors: ['#FF4D4D', '#FF9A7A'], bg: '#05060A', seed: 11, turns: -.35 }),
+};
+const BGHOST = document.getElementById('bg'); Object.values(BG).forEach((b) => { b.el.style.display = 'none'; BGHOST.appendChild(b.el); });
+const SCENE_BG = ['gold', 'gold', 'red', 'red', 'gold', 'red', 'gold', 'gold'];
+
+/* ---- scene 0: title ---- */
+function s0() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px;text-align:center">Báo cáo</div>');
+  const a = put(r, '<div class="big gold" style="font-size:160px;top:850px">Vàng sáng</div>');
+  const pill = put(r, `<div class="big mu" style="font-size:44px;font-weight:700;top:1070px">${G.date.d}/${G.date.m}/${G.date.y} · ${G.date.hh}:${G.date.mm} · radar 7 chiều</div>`);
+  return { el: r, draw(t) { rise(k, t, ta(0, 0), 0.4, 30); rise(a, t, ta(0, 0), 0.6, 80); rise(pill, t, ta(0, 3), 0.5, 30); } };
+}
+
+/* ---- scene 1: domestic SJC ---- */
+function s1() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px">SJC · triệu đồng / lượng</div>');
+  const card = put(r, '<div class="card" style="left:70px;top:845px;width:940px;height:300px"></div>');
+  const colB = put(r, `<div style="position:absolute;left:115px;top:880px;width:380px"><div class="lbl">MUA VÀO</div><div class="v1" style="font-size:118px;font-weight:900;letter-spacing:-.03em;line-height:1.1">0</div></div>`);
+  const colS = put(r, `<div style="position:absolute;left:560px;top:880px;width:420px"><div class="lbl">BÁN RA</div><div class="v2 gold" style="font-size:118px;font-weight:900;letter-spacing:-.03em;line-height:1.1">0</div></div>`);
+  const chip = put(r, `<div class="chip" style="left:115px;top:1050px;background:rgba(255,255,255,.1);color:#C9CCD3;font-size:30px">Giữ nguyên 2 phiên</div>`);
+  const v1 = colB.querySelector('.v1'), v2 = colS.querySelector('.v2');
+  return { el: r, draw(t) {
+    const a1 = ta(1, find(1, G.sjc.buy)), a2 = ta(1, find(1, G.sjc.sell)), p1 = ap(t, a1 - 0.1, 0.8), p2 = ap(t, a2 - 0.1, 0.8);
+    rise(k, t, lineStart(1), 0.4, 20); rise(card, t, a1 - 0.5, 0.5, 40);
+    colB.style.opacity = ap(t, a1 - 0.4, 0.3); colS.style.opacity = ap(t, a2 - 0.4, 0.3);
+    v1.textContent = fmt(G.sjc.v.buy * p1, decs(G.sjc.buy)); v2.textContent = fmt(G.sjc.v.sell * p2, decs(G.sjc.sell));
+    rise(chip, t, ta(1, DISP[1].length - 2), 0.4, 20);
+  } };
+}
+
+/* ---- scene 2: world gold ---- */
+function s2() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px;text-align:center">Vàng thế giới · USD / ounce</div>');
+  const n = put(r, '<div class="big red" style="font-size:150px;top:850px">$0</div>');
+  const c1 = put(r, `<div class="chip red" style="left:70px;top:1050px;background:rgba(255,107,107,.14)">−${G.xau.chg}% phiên 22/10</div>`);
+  const c2 = put(r, `<div class="chip red" style="left:70px;top:1140px;background:rgba(255,107,107,.14)">−${G.xau.fromPeak}% so với đỉnh 30 phiên</div>`);
+  const c3 = put(r, `<div class="chip mu" style="left:70px;top:1230px;background:rgba(255,255,255,.08)">Thấp nhất khoảng 7 tháng</div>`);
+  return { el: r, draw(t) {
+    const a = ta(2, find(2, G.xau.price)), p = ap(t, a - 0.1, 1.0);
+    rise(k, t, lineStart(2), 0.4, 20); n.style.opacity = ap(t, a - 0.3, 0.3); n.textContent = '$' + fmt(G.xau.v * p, decs(G.xau.price));
+    rise(c1, t, ta(2, find(2, G.xau.chg)), 0.4, 20); rise(c2, t, ta(2, find(2, G.xau.chg)) + 0.6, 0.4, 20); rise(c3, t, ta(2, find(2, G.xau.chg)) + 1.3, 0.4, 20);
+  } };
+}
+
+/* ---- scene 3: premium (bars start at 0) ---- */
+function s3() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px">SJC so với thế giới quy đổi · triệu / lượng</div>');
+  const MAXW = 860, max = G.sjc.v.sell, wOf = (v) => v / max * MAXW;
+  const b1 = put(r, `<div class="bar" style="top:845px;width:0;background:linear-gradient(90deg,#D4A53A,#FFE2A0);color:#1A1405"><b>SJC bán ra</b><i>${G.sjc.sell}</i></div>`);
+  const b2 = put(r, `<div class="bar" style="top:935px;width:0;background:#3A3F4B;color:#F4F1EA"><b>Thế giới quy đổi</b><i>${G.conv.vn}</i></div>`);
+  const big = put(r, `<div class="big red" style="font-size:170px;top:1050px">+${G.premium.pct}%</div>`);
+  const sub = put(r, `<div class="big mu" style="font-size:38px;font-weight:700;top:1240px">SJC cao hơn ${G.premium.tr} triệu một lượng</div>`);
+  return { el: r, draw(t) {
+    const a = ta(3, 0), p1 = ap(t, a, 0.8), p2 = ap(t, a + 0.5, 0.8);
+    rise(k, t, lineStart(3), 0.4, 20);
+    b1.style.width = Math.max(0, wOf(G.sjc.v.sell) * p1).toFixed(1) + 'px'; b2.style.width = Math.max(0, wOf(G.conv.v) * p2).toFixed(1) + 'px';
+    b1.style.opacity = ap(t, a, 0.2); b2.style.opacity = ap(t, a + 0.5, 0.2);
+    const ak = ta(3, find(3, G.premium.pct)); rise(big, t, ak - 0.1, 0.55, 60); rise(sub, t, ta(4, 0), 0.45, 24);
+  } };
+}
+
+/* ---- scene 4: macro ---- */
+function s4() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px">Vĩ mô</div>');
+  const card = (x, lbl, val, sub, cls = '') => put(r, `<div class="card" style="left:${x}px;top:850px;width:290px;height:300px;padding:34px 24px;text-align:center"><div class="lbl" style="font-size:26px">${lbl}</div><div class="${cls}" style="font-size:78px;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:34px">${val}</div><div style="font-size:28px;font-weight:700;color:#8A8F9A;margin-top:12px">${sub}</div></div>`);
+  const c1 = card(70, 'FED', '+' + G.macro.fed, 'điểm cơ bản · ' + G.macro.vote, 'red');
+  const c2 = card(395, 'LỢI SUẤT MỸ 10 NĂM', G.macro.us10y + '%', 'US10Y');
+  const c3 = card(720, 'CHỈ SỐ ĐÔ LA', G.macro.dxy, 'DXY');
+  const note = put(r, `<div class="chip mu" style="left:70px;top:1195px;background:rgba(255,255,255,.08);font-size:30px">Lực cản ngắn hạn cho vàng</div>`);
+  return { el: r, draw(t) {
+    rise(k, t, lineStart(5), 0.4, 20);
+    rise(c1, t, ta(5, 0), 0.5, 50); rise(c2, t, ta(6, find(6, G.macro.us10y)) - 0.7, 0.5, 50); rise(c3, t, ta(6, find(6, G.macro.dxy)) - 0.7, 0.5, 50);
+    rise(note, t, ta(6, DISP[6].length - 1) + 0.3, 0.4, 20);
+  } };
+}
+
+/* ---- scene 5: trend vs the all-time high (bars start at 0) ---- */
+function s5() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px">Trong nước · SJC bán ra · triệu / lượng</div>');
+  const MAXW = 860, max = G.trend.peakV, wOf = (v) => v / max * MAXW;
+  const b1 = put(r, `<div class="bar" style="top:845px;width:0;background:#3A3F4B;color:#F4F1EA"><b>Đỉnh lịch sử</b><i>${G.trend.peak}</i></div>`);
+  const b2 = put(r, `<div class="bar" style="top:935px;width:0;background:linear-gradient(90deg,#D4A53A,#FFE2A0);color:#1A1405"><b>Nay</b><i>${G.sjc.sell}</i></div>`);
+  const big = put(r, `<div class="big red" style="font-size:170px;top:1050px">−${G.trend.fromPeak}%</div>`);
+  const chip = put(r, `<div class="chip red" style="left:70px;top:1240px;background:rgba(255,107,107,.14);font-size:32px">Giảm ${G.trend.days} phiên liên tiếp · −${G.trend.drop} triệu từ đầu tuần</div>`);
+  return { el: r, draw(t) {
+    const a = ta(7, find(7, G.trend.peak)), p1 = ap(t, a - 0.1, 0.8), p2 = ap(t, a + 0.5, 0.8);
+    rise(k, t, lineStart(7), 0.4, 20);
+    b1.style.width = Math.max(0, wOf(G.trend.peakV) * p1).toFixed(1) + 'px'; b2.style.width = Math.max(0, wOf(G.sjc.v.sell) * p2).toFixed(1) + 'px';
+    b1.style.opacity = ap(t, a - 0.1, 0.2); b2.style.opacity = ap(t, a + 0.5, 0.2);
+    rise(chip, t, ta(7, 0) + 0.5, 0.45, 20);
+    rise(big, t, ta(7, find(7, G.trend.fromPeak)) - 0.1, 0.55, 60);
+  } };
+}
+
+/* ---- scene 6: levels ---- */
+function s6() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:790px">Thế giới (USD) · SJC (triệu)</div>');
+  const rows = [
+    [G.levels.xauRes[0], 'kháng cự', 'red', 8, find(8, G.levels.xauRes[0])],
+    [G.levels.xauRes[1], 'kháng cự', 'red', 8, find(8, G.levels.xauRes[1])],
+    [G.xau.price, 'hiện tại', 'gold', 8, 0],
+    [G.levels.xauSup[0], 'hỗ trợ', 'grn', 8, find(8, G.levels.xauSup[0])],
+    [G.levels.xauSup[1], 'hỗ trợ', 'grn', 8, find(8, G.levels.xauSup[1])],
+  ];
+  const nodes = rows.map(([v, role, cls, li, ki], j) => put(r, `<div style="position:absolute;left:70px;top:${845 + j * 84}px;width:460px;height:76px;display:flex;align-items:baseline;gap:18px;border-radius:20px;padding:6px 24px;box-sizing:border-box;background:rgba(255,255,255,${cls === 'gold' ? '.12' : '.06'})"><span class="${cls}" style="font-size:${cls === 'gold' ? 50 : 46}px;font-weight:900">${v}</span><span style="font-size:26px;font-weight:700;color:#8A8F9A">${role}</span></div>`));
+  const buy = put(r, `<div class="card" style="left:565px;top:845px;width:445px;height:200px;padding:28px 30px"><div class="lbl">SJC · VÙNG MUA TỐT</div><div class="grn" style="font-size:72px;font-weight:900;margin-top:22px">${G.levels.sjcBuyLo} – ${G.levels.sjcBuyHi}</div></div>`);
+  const sell = put(r, `<div class="card" style="left:565px;top:1065px;width:445px;height:200px;padding:28px 30px"><div class="lbl">SJC · VÙNG BÁN</div><div class="red" style="font-size:72px;font-weight:900;margin-top:22px;white-space:nowrap">${G.levels.sjcSellLo} – ${G.levels.sjcSellHi}</div></div>`);
+  return { el: r, draw(t) {
+    rise(k, t, lineStart(8), 0.4, 20);
+    nodes.forEach((n, j) => { const [, , , li, ki] = rows[j]; const a = j === 2 ? ta(8, 0) : ta(li, ki); const p = back(t, a - 0.15, 0.5); n.style.opacity = ap(t, a - 0.15, 0.3); n.style.transform = `translateX(${((1 - p) * -40).toFixed(1)}px)`; });
+    rise(buy, t, ta(9, find(9, G.levels.sjcBuyLo)) - 0.4, 0.5, 40); rise(sell, t, ta(9, find(9, G.levels.sjcBuyLo)) + 0.9, 0.5, 40);
+  } };
+}
+
+/* ---- scene 7: verdict, then each line of the report's recommendation as it is read ---- */
+function s7() {
+  const r = el();
+  const k = put(r, '<div class="k" style="top:735px;text-align:center">Theo báo cáo</div>');
+  const v = put(r, `<div class="big gold" style="font-size:150px;top:775px">${G.rec.verdict}</div>`);
+  const sub = put(r, `<div class="big" style="font-size:52px;font-weight:800;top:935px">${G.rec.sub}</div>`);
+  const bl = [
+    [11, `Premium ${G.premium.pct}% · SJC chưa theo thế giới`],
+    [12, `Fed diều hâu · đô la, lợi suất còn cao`],
+    [13, `Giải ngân khi SJC ${G.levels.sjcBuyLo}–${G.levels.sjcBuyHi} và premium < ${G.premium.ceil}%`],
+    [14, `Cảnh báo: thủng ${G.levels.xauSup[1]} → trung hạn xấu`],
+  ].map(([li, txt], j) => ({ li, e: put(r, `<div style="position:absolute;left:70px;top:${1030 + j * 62}px;width:940px;font-size:34px;font-weight:700;line-height:1.2;white-space:nowrap"><span style="color:#E4B94B">▸</span> ${txt}</div>`) }));
+  return { el: r, draw(t) {
+    rise(k, t, ta(10, 0) - 0.1, 0.4, 20); rise(v, t, ta(10, 2), 0.6, 80); rise(sub, t, ta(10, 3), 0.5, 30);
+    bl.forEach((b) => rise(b.e, t, ta(b.li, 0), 0.4, 18));
+  } };
+}
+
+const SC = [s0(), s1(), s2(), s3(), s4(), s5(), s6(), s7()];
+const host = document.getElementById('scenes');
+SC.forEach((s) => { s.el.style.display = 'none'; host.appendChild(s.el); });
+
+/* captions: pages of <= 5 display tokens, broken at punctuation */
+const PAGES = [];
+DISP.forEach((d, i) => {
+  let cur = []; const flush = () => { if (cur.length) { PAGES.push(cur); cur = []; } };
+  d.forEach(([w], k) => { cur.push({ w, a: ta(i, k), b: tb(i, k) }); if (cur.length >= 5 || /[,.?!:;]$/.test(w)) flush(); });
+  flush();
+});
+const cap = document.getElementById('cap'); let capKey = -1;
+function frame(T) {
+  let cur = -1;
+  SC.forEach((s, i) => {
+    const sc = TL.scenes[i], inA = clamp((T - sc.a) / 0.3), outA = i === SC.length - 1 ? 1 : clamp((sc.b + 0.1 - T) / 0.3);
+    const vis = T >= sc.a - 0.001 && T <= sc.b + 0.11;
+    s.el.style.display = vis ? 'block' : 'none';
+    if (!vis) return;
+    const o = ease(inA) * ease(outA); s.el.style.opacity = o;
+    s.draw(T);
+    if (T >= sc.a && (cur < 0 || sc.a >= TL.scenes[cur].a)) { cur = i; BGHOST.style.opacity = o; }
+  });
+  if (cur >= 0) {
+    const name = SCENE_BG[cur];
+    Object.keys(BG).forEach((n) => { BG[n].el.style.display = n === name ? 'block' : 'none'; });
+    BG[name].draw(Math.max(0, T - TL.scenes[cur].a) / (60 / BPM));
+  }
+  let pi = -1; PAGES.forEach((p, i) => { if (T >= p[0].a - 0.05) pi = i; });
+  const last = pi >= 0 ? PAGES[pi][PAGES[pi].length - 1].b : 0;
+  const showing = pi >= 0 && T < last + 0.5 ? pi : -1;
+  if (showing !== capKey) { capKey = showing; cap.innerHTML = showing < 0 ? '' : PAGES[showing].map((x) => `<span>${x.w}</span>`).join(' '); }
+  if (showing >= 0) PAGES[showing].forEach((x, i) => { cap.children[i].className = T >= x.b ? 'done' : T >= x.a ? 'on' : ''; });
+}
+VP.boot({ seek: frame, dur: DUR, cues: () => [], fonts: ['900 200px "Be Vietnam Pro"', '800 60px "Be Vietnam Pro"', '700 40px "Be Vietnam Pro"', '500 28px "Be Vietnam Pro"'] });
+window.SIZE = [W, H]; window.BPM = BPM; window.B = B;
+window.AUDIT = { beats: TL.scenes.map((s) => +((s.a + s.b) / 2).toFixed(1)), safe: [60, 220, 970, 1540], minFont: 26, ignore: ['canvas'] };
+</script></body></html>
+

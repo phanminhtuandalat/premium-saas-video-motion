@@ -1,0 +1,50 @@
+🥇 BÁO CÁO VÀNG SÁNG — 23/10/2026 (07:00, radar 7 chiều)
+
+1️⃣ Giá trong nước (chốt 22/10 15:43 — SJC chưa mở cửa sáng nay, báo chí ghi "đứng giá")
+- SJC miếng: mua 139,3 — bán 142,3 tr/lượng (giữ nguyên 2 phiên)
+- Bảo Tín Minh Châu: 138,1 — 142,3 (spread 4,2 tr)
+- Mi Hồng: 140,8 — 142,3 (spread 1,5 tr) ← mua vào cao nhất thị trường
+- Nhẫn trơn: BTMC 138,1 — 142,1 | DOJI 138,5 — 142,5 | Phú Quý 138,7 — 141,7
+
+2️⃣ Thế giới
+- XAU spot: $4.024,8/oz (−2,7% phiên 22/10)
+- GC=F: $4.037 (−113,0 / −2,72%)
+- Đỉnh 30 phiên 4.376,4 → hiện −7,8%, thấp nhất ~7 tháng
+- Tuần: 4.181,1 (16/10) → 4.037 = −3,4%
+
+3️⃣ Quy đổi & premium (công thức 1,20565 × tỷ giá)
+- 4.024,8 × 1,20565 × 25.847 = 125,42 tr/lượng
+- Premium SJC bán: +16,88 tr = +13,5% (vượt rất xa ngưỡng 8 tr của mô hình)
+- Tính theo VCB 26.040: 126,36 tr → premium +15,9 tr (12,6%)
+- Sáng 21/10 báo chí ghi chênh 13,6 tr → premium đã nới thêm ~3 tr chỉ trong 1 phiên vì TG sập mà SJC không giảm
+
+4️⃣ Vĩ mô
+- DXY 101,57 (−0,15% phiên; −0,98% từ đỉnh 30 phiên 102,58)
+- US10Y 4,95% (−17 bp phiên; −32 bp trong 3 tuần từ 5,27%)
+- Fed tăng 25 bp, biểu quyết 12–0; 16/18 thành viên còn thấy tăng tiếp trong 2026 (Kitco/Reuters) → lực cản ngắn hạn cho vàng
+- USD/VND: liên ngân hàng 25.847 | NHNN trung tâm 25.632 (−2đ) | VCB 25.650 / 26.030 (−40đ)
+
+5️⃣ Xu hướng trong nước 7 phiên
+- 20/10: 139,6–142,6 → 21/10: 139,3–142,3 → 22/10: 139,3–142,3
+- Giảm 4 phiên liên tiếp, −1,4 tr/lượng từ đầu tuần
+- Đỉnh lịch sử 191,3 tr (cuối 1/2026) → nay −25,6%
+
+6️⃣ Kỹ thuật
+- Vàng TG: hỗ trợ 4.000 / 3.950 — kháng cự 4.100 / 4.150
+- SJC: vùng mua tốt 138–139 — vùng bán 142,3–143,7
+
+7️⃣ Nhận định & khuyến nghị
+
+Nhận định: Vàng thế giới sập 2,7% sau khi Fed tăng lãi suất lần nữa, nhưng SJC "đứng im" → giá trong nước đang đắt hơn thế giới 13,5%, mức premium cấu trúc cao nhất trong nhiều tháng.
+
+Khuyến nghị: GIỮ — KHÔNG MUA MỚI (vị thế ngắn hạn nên giảm tỷ trọng)
+- Không mua mới: premium 13,5% + SJC chưa điều chỉnh theo TG (thường trễ 1–2 phiên) → mua lúc này là mua giá cũ, chịu ngay rủi ro điều chỉnh 3–5 tr
+- Fed hawkish (12–0, còn tăng) + DXY/lợi suất còn neo cao = chưa có catalyst bật tăng
+- Nếu cần bán: chọn nơi mua vào cao (Mi Hồng 140,8 vs BTMC 138,1 → chênh 2,7 tr/lượng), canh nhịp hồi 141–142
+- Vị thế dài hạn (>2 năm): giữ, chưa thủng 4.000 thì xu hướng chưa gãy
+- Kích hoạt giải ngân từng phần khi: SJC về 138–139 và premium < 12%
+- Cảnh báo đảo chiều: XAU thủng 3.950 → xu hướng trung hạn xấu
+
+📍 Nguồn: BTMC API (22/10 15:43), gold-api XAU (23/10 00:00Z), Yahoo Finance GC=F/DXY/^TNX, open.er-api, Vietcombank, Kitco/Reuters/VOV/Dân trí qua Google News. Đường API-only, không cần CloakBrowser.
+
+⚠️ Tham khảo, không phải khuyến nghị tài chính.
