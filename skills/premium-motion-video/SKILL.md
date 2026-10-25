@@ -183,6 +183,19 @@ motion (button press, card grow, number count, cursor). Illustrative data only w
 - Pick 2–3 transition families and one recurring motif; bridge scenes with an object already on screen.
 - 3D (Three.js) only when it has a job: `engine/scene3d.js`, shot type `scene3d`, camera and particles are pure functions of the beat (`VP.rng`, no Clock/mixer).
 
+## Idea bank — viral Opus 5.5 videos and their prompts (`tools/promptbank.mjs`)
+
+`references/prompt-bank/bank.json` holds 703 prompts behind viral videos that creators made with Claude Opus 5.5 (categories: motion 369, 3d 117, explainer 116, interactive 101; tags: canvas, svg, threejs, shader, gsap, audio, playable…). Source: yihui-dev/awesome-opus5-5-videos, MIT (licence copy next to the file). Use it when you build the style menu ("list the styles first") or when a brief has no reference: search by idea, show the user 3–5 matches with their original post link, and let them pick.
+
+```bash
+node tools/promptbank.mjs data counter marbles --cat explainer -n 5     # keywords are English; add --full for the whole prompt
+node tools/promptbank.mjs --stats
+```
+
+- It is a source of IDEAS and prompt wording. Films are still built on this repo's engine (`VP.*`) and the page contract; never paste another creator's output, and link their post when you borrow a concept.
+- Prompt shape worth copying: `<inputs>` (what to ask the user), `<rules>` (one HTML, one draw(t), no timers), `<structure>` (beat grid, one event per beat), `<motion>`, `<export>` (contact sheet first, then full render). Our Step 0 intake + spec + `sheet.mjs` already cover this order.
+- Their render recipe matches ours: frame number in, same picture out; first frame = last frame for loops; contact sheet before render; several aspect ratios from one page. We still lack: 6-subframe motion blur by default (we use `--sub 2`; try `--sub 6` on hero shots) and one command that exports every aspect ratio in parallel.
+
 ## Style comes from the brand, not from a house style
 The first design decision is the **style family**, read from the brand: fonts, textures, illustration assets,
 UI tone, audience. Apple-keynote minimalism is ONE playbook, not the rule. Match the product:
@@ -237,6 +250,7 @@ For a scene that explains a technical idea (cache, queue, rate limiter, sensor l
   the beat) → release into a success state (label rolls to "✓ Đã đăng ký" / "Đang kết nối…", confetti or particle burst in
   brand colours, `hit`/`unlock` SFX) → hold ≥ 1.5 s on logo + URL/hotline, music tails out. Build it with the film's own
   cursor and `VP.sp`, not a GIF.
+- Container then content (from the Opus 5.5 prompt bank): content enters AFTER its container starts to morph and leaves BEFORE the next morph, so text never overlaps a moving shape. Never fade black straight into the accent colour: move an accent element between states instead. A tab/underline indicator stretches when each edge rides its own spring. If a value changes target several times, sum one spring per change (`VP.track`).
 - Say plainly what is illustrative (demo numbers, chat lines) and flag third-party music/photos as internal-use unless
   licensed. Reference kits (e.g. other creators' boards) are inspiration: re-implement, never copy their code/art.
 
